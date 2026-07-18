@@ -1,5 +1,5 @@
 import React from "react";
-import GithubButton from "@/components/common/GithubButton";
+import GithubButton from "@/features/auth/components/GithubButton";
 
 const SignInPage = () => {
 

@@ -22,6 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import Dashboard from "@/features/dashboard/components/Dashboard";
+import GithubApps from "@/features/github-apps/components/GithubApps";
+import PullRequests from "@/features/pull-requests/components/PullRequests";
+import Repositories from "@/features/repositories/components/Repositories";
+import Reviews from "@/features/reviews/components/Reviews";
+
 const SideBar = () => {
   const [width, setWidth] = useState(() => {
     if (typeof window !== "undefined") {
@@ -44,11 +50,11 @@ const SideBar = () => {
   const MAX_WIDTH = 450;
 
   const navItems = [
-    { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
-    { label: "GitHub App", to: "/github-app", icon: ComputerIcon },
-    { label: "Pull Requests", to: "/pull-requests", icon: GitBranch },
-    { label: "Repositories", to: "/repositories", icon: Database },
-    { label: "Settings", to: "/settings", icon: Settings },
+    { label: <Dashboard />, to: "/dashboard", icon: LayoutGrid },
+    { label: <GithubApps />, to: "/github-apps", icon: ComputerIcon },
+    { label: <PullRequests />, to: "/pull-requests", icon: GitBranch },
+    { label: <Repositories />, to: "/repositories", icon: Database },
+    { label: <Reviews />, to: "/reviews", icon: Settings },
   ];
 
   useEffect(() => {
@@ -75,6 +81,12 @@ const SideBar = () => {
       window.removeEventListener("mouseup", stopResize);
     };
   }, [isResizing]);
+
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    window.location.href = "/sign-in";
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
@@ -134,27 +146,10 @@ const SideBar = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-900/60" />
 
-                  {/* <DropdownMenuItem
-                    asChild
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-300 hover:bg-slate-900 hover:text-white cursor-pointer transition-colors focus:bg-slate-900 focus:text-white"
-                  >
-                    <a
-                      href={`https://github.com/${displayName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="h-4 w-4 text-slate-400" />
-                      <span>GitHub Profile</span>
-                    </a>
-                  </DropdownMenuItem> */}
-
                   <DropdownMenuSeparator className="bg-slate-900/60" />
 
                   <DropdownMenuItem
-                    onClick={async () => {
-                      await authClient.signOut();
-                      window.location.href = "/sign-in";
-                    }}
+                    onClick={handleSignOut}
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 cursor-pointer transition-colors focus:bg-rose-950/20 focus:text-rose-300"
                   >
                     <LogOut className="h-4 w-4" />

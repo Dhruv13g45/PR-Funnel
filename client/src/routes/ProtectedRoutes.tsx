@@ -1,6 +1,7 @@
 import { useSession } from "@/hooks/useSession";
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import LoadingScreen from "@/components/common/LoadingScreen";
 
 const ProtectedRoutes = () => {
   const { data: session, isPending } = useSession();
@@ -8,7 +9,7 @@ const ProtectedRoutes = () => {
   console.log(isPending);
 
   if (isPending) {
-    return <div>Loadinng....</div>;
+    return <LoadingScreen />;
   }
 
   if (!session) {
