@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
+import githubRouter from "./routes/github.routes.js"
 
 const app = express();
 
@@ -19,7 +20,11 @@ app.use(cookieParser());
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
-app.use(express.json());
+app.use(express.json({
+  verify: (req: any, res, buffer) => {
+    req.rawBody = buffer;
+  },
+}));
 
 app.use("/health", (req, res) => {
   res.json({
@@ -27,6 +32,17 @@ app.use("/health", (req, res) => {
   });
 });
 
+
+app.use("/api/github", githubRouter)
+
+
+app.use((req, res) => {
+  console.log("404 HIT:", req.method, req.originalUrl);
+
+  res.status(404).json({
+    message: "Route not found",
+  });
+});
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
