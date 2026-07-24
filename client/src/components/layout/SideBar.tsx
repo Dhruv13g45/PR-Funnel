@@ -22,11 +22,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import Dashboard from "@/features/dashboard/components/Dashboard";
-import GithubApps from "@/features/github-apps/components/GithubApps";
-import PullRequests from "@/features/pull-requests/components/PullRequests";
-import Repositories from "@/features/repositories/components/Repositories";
-import Reviews from "@/features/reviews/components/Reviews";
+// Nav labels will be plain text with icons; individual route components
+// are rendered by the router `Outlet` at the main pane.
 
 const SideBar = () => {
   const [width, setWidth] = useState(() => {
@@ -50,11 +47,11 @@ const SideBar = () => {
   const MAX_WIDTH = 450;
 
   const navItems = [
-    { label: <Dashboard />, to: "/dashboard", icon: LayoutGrid },
-    { label: <GithubApps />, to: "/github-apps", icon: ComputerIcon },
-    { label: <PullRequests />, to: "/pull-requests", icon: GitBranch },
-    { label: <Repositories />, to: "/repositories", icon: Database },
-    { label: <Reviews />, to: "/reviews", icon: Settings },
+    { label: "Dashboard", to: "/dashboard", icon: LayoutGrid },
+    { label: "GitHub Apps", to: "/github-apps", icon: ComputerIcon },
+    { label: "Pull Requests", to: "/pull-requests", icon: GitBranch },
+    { label: "Repositories", to: "/repositories", icon: Database },
+    { label: "Reviews", to: "/reviews", icon: Settings },
   ];
 
   useEffect(() => {
@@ -82,11 +79,10 @@ const SideBar = () => {
     };
   }, [isResizing]);
 
-
   const handleSignOut = async () => {
-    await authClient.signOut()
+    await authClient.signOut();
     window.location.href = "/sign-in";
-  }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
@@ -99,7 +95,10 @@ const SideBar = () => {
           {/* Top Panel - Logo, Title & Profile Dropdown */}
           <div className="relative flex flex-col gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/30 px-4 py-3 shadow-inner shadow-slate-950/20">
             <div className="flex items-center justify-between gap-3">
-              <NavLink to="/dashboard" className="flex items-center gap-2.5 outline-none group">
+              <NavLink
+                to="/dashboard"
+                className="flex items-center gap-2.5 outline-none group"
+              >
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/10 group-hover:scale-105 transition-transform duration-200">
                   <GitBranch className="h-5 w-5" />
                 </div>
@@ -139,9 +138,15 @@ const SideBar = () => {
                 >
                   <DropdownMenuLabel className="px-2 py-1.5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-medium text-slate-500">Logged in as</span>
-                      <span className="text-xs font-semibold text-slate-200 truncate">{displayName}</span>
-                      <span className="text-[10px] text-slate-400 truncate">{displayEmail}</span>
+                      <span className="text-[10px] font-medium text-slate-500">
+                        Logged in as
+                      </span>
+                      <span className="text-xs font-semibold text-slate-200 truncate">
+                        {displayName}
+                      </span>
+                      <span className="text-[10px] text-slate-400 truncate">
+                        {displayEmail}
+                      </span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-slate-900/60" />
@@ -174,23 +179,24 @@ const SideBar = () => {
                     "relative flex items-center h-10 rounded-xl px-3 text-sm font-medium transition-all duration-200 outline-none group",
                     isActive
                       ? "text-sky-300 font-semibold"
-                      : "text-slate-400 hover:text-slate-200"
+                      : "text-slate-400 hover:text-slate-200",
                   )}
                 >
-
                   {isActive && (
                     <motion.div
                       layoutId="activeNavHighlight"
                       className="absolute inset-0 rounded-xl bg-gradient-to-r from-slate-900/80 to-slate-900/30 border border-slate-800/80 shadow-sm"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 30,
+                      }}
                     />
                   )}
-
 
                   {isActive && (
                     <span className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-gradient-to-b from-sky-400 to-blue-500 shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
                   )}
-
 
                   {!isActive && (
                     <div className="absolute inset-0 rounded-xl bg-slate-900/0 group-hover:bg-slate-900/40 border border-transparent group-hover:border-slate-900/60 transition-all duration-200" />
@@ -202,12 +208,14 @@ const SideBar = () => {
                         "flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200",
                         isActive
                           ? "text-sky-400 bg-sky-950/20"
-                          : "text-slate-400 group-hover:text-slate-300 group-hover:bg-slate-900/20"
+                          : "text-slate-400 group-hover:text-slate-300 group-hover:bg-slate-900/20",
                       )}
                     >
                       <Icon className="h-4.5 w-4.5" />
                     </div>
-                    <span className="text-[13px] tracking-wide">{item.label}</span>
+                    <span className="text-[13px] tracking-wide">
+                      {item.label}
+                    </span>
                   </div>
                 </NavLink>
               );
@@ -226,18 +234,20 @@ const SideBar = () => {
           </div>
         </div>
 
-
         <div
           className="absolute right-0 top-0 bottom-0 z-20 w-1 cursor-col-resize group"
           onMouseDown={() => setIsResizing(true)}
         >
-          <div className={cn(
-            "absolute right-0 top-0 bottom-0 w-[2px] transition-colors duration-200",
-            isResizing ? "bg-sky-500" : "bg-slate-900 group-hover:bg-slate-700"
-          )} />
+          <div
+            className={cn(
+              "absolute right-0 top-0 bottom-0 w-[2px] transition-colors duration-200",
+              isResizing
+                ? "bg-sky-500"
+                : "bg-slate-900 group-hover:bg-slate-700",
+            )}
+          />
         </div>
       </aside>
-
 
       <main className="flex-1 overflow-y-auto">
         <Outlet />
