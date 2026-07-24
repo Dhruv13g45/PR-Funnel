@@ -1,19 +1,30 @@
-import type { Request } from "express"
-import { verifySignature } from "../utils/githubSignature.js"
+export async function githubWebhookService(event: string, payload: any) {
+  switch (event) {
+    case "installation":
+      console.log("Installation Event");
+      console.log(payload);
+      break;
 
-export function githubWebhookService(req: Request) {
+    case "installation_repositories":
+      console.log("Installation Repositories Event");
+      console.log(payload);
+      break;
 
-    const signature = req.headers["x-hub-signature-256"]
+    case "pull_request":
+      console.log("Pull Request Event");
+      console.log(payload);
+      break;
 
-    const valid = verifySignature(signature as string, req.rawBody!)
+    case "ping":
+      console.log("Ping Event");
+      console.log(payload);
+      break;
 
-    if (!valid) {
-        throw new Error("Invalid Webhook signature")
-    }
+    default:
+      console.log(`Unhandled event: ${event}`);
+  }
+}
 
-
-    return {
-        processed: true
-    }
-
+export function githubInstallationService(state: string): string {
+  return `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new?state=${encodeURIComponent(state)}`;
 }

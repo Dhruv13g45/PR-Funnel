@@ -1,4 +1,3 @@
-import React from "react";
 import GithubButton from "@/features/auth/components/GithubButton";
 
 const SignInPage = () => {

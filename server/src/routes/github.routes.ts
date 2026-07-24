@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { githubWebhookController } from "../controllers/github.controllers.js";
+import {
+  githubWebhookController,
+  githubInstallationController,
+  githubCallbackController,
+} from "../controllers/github.controllers.js";
 
+const router = Router();
 
-const router = Router()
+router.post("/webhook", githubWebhookController);
+router.get("/install-url", githubInstallationController);
+router.get("/callback", githubCallbackController);
 
-
-router.post("/webhook", githubWebhookController)
-
-
-export default router
+export default router;

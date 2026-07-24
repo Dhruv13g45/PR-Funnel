@@ -1,8 +1,11 @@
 import React from 'react'
+import GithubConnectCard from './GithubConnectCard'
 
 const GithubApps = () => {
     return (
-        <div>GithubApps</div>
+        <div>
+            <GithubConnectCard />
+        </div>
     )
 }
 
