@@ -10,55 +10,52 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  GitBranch,
-  Plug,
-  Link,
-  Trash2,
-  Loader2,
-  Key,
-  GitPullRequest,
-  Bot,
-} from "lucide-react";
-
+import { Plug, Trash2, Loader2, Key, GitPullRequest, Bot } from "lucide-react";
 import { api } from "@/lib/api";
+import { useGithubInstallation } from "@/hooks/useGithubInstallation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const GithubConnectCard: React.FC = () => {
-  const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleToggle = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setConnected((c) => !c);
-    setLoading(false);
-  };
+  const queryClient = useQueryClient();
+
+  const { data } = useGithubInstallation();
+
+  const connected = data?.installed ?? false;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
-    if (!params) {
-      setConnected(false);
-    } else {
-      const installed = params.get("installed");
+    if (params.get("installed")) {
+      queryClient.invalidateQueries({
+        queryKey: ["github-installation"],
+      });
 
-      if (installed) {
-        setConnected(true);
-      } else {
-        setConnected(false);
-      }
+      window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
 
   const handleInstallation = async () => {
-    try {
-      const response = await api.get("/github/install-url");
-      window.location.href = await response?.data?.data;
-    } catch (error: any) {
-      console.log("Status:", error.response?.status);
-      console.log("Response:", error.response?.data);
-      console.log("URL:", error.config?.url);
-      console.log("Base URL:", error.config?.baseURL);
+    if (connected) {
+      const response = await api.get("/github/disconnect");
+      const success = response?.data?.success ?? undefined;
+
+      if (success) {
+        queryClient.invalidateQueries({
+          queryKey: ["github-installation"],
+        });
+      }
+    } else {
+      try {
+        const response = await api.get("/github/install-url");
+        window.location.href = await response?.data?.data;
+      } catch (error: any) {
+        console.log("Status:", error.response?.status);
+        console.log("Response:", error.response?.data);
+        console.log("URL:", error.config?.url);
+        console.log("Base URL:", error.config?.baseURL);
+      }
     }
   };
 

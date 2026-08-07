@@ -6,29 +6,14 @@ import {
 import { githubWebhooks } from "../github/githubWebhook.js";
 import {
   getInstallationDetails,
+  githubDisconnectService,
   saveInstallationDetails,
 } from "../services/githubApp.services.js";
 import { getUserSession } from "../utils/getUserSession.js";
 import { generateGithubState, verifyGithuState } from "../utils/githubState.js";
+import { getSession } from "better-auth/api";
+import { prisma } from "../db/db.js";
 
-// export function githubWebhookController(req: Request, res: Response) {
-//   try {
-//     const event = req.headers["x-github-event"] as string;
-
-//     const data = githubWebhookService(event, req.body);
-
-//     return res
-//       .json({
-//         message: "Verified webhook signature",
-//         data: data,
-//       })
-//       .status(200);
-//   } catch (error) {
-//     return res.status(401).json({
-//       message: "Invalid Webhook signature",
-//     });
-//   }
-// }
 
 export async function githubWebhookController(req: Request, res: Response) {
   try {
@@ -92,4 +77,49 @@ export async function githubCallbackController(req: Request, res: Response) {
   return res.redirect(
     `http://localhost:5173/github-apps?installed=${installFlag}`,
   );
+}
+
+export async function githubDisconnectController(req: Request, res: Response) {
+  const userId = await getUserSession(req as any);
+
+  if (userId) {
+    const response = (await githubDisconnectService(userId)) as {
+      message: string;
+      success: boolean;
+    } | null;
+
+    const success = response?.success ?? undefined;
+
+    return res.status(200).json({ message: response?.message ?? "", success });
+  }
+
+  return res.status(401).json({ message: "Unauthorized", success: false });
+}
+
+
+
+
+export async function getGithubInstallationStatusController(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const userId = await getUserSession(req as any);
+
+    const installation = await prisma.githubInstallation.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      installed: !!installation,
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      installed: false,
+    });
+  }
 }
