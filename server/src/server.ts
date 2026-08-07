@@ -5,8 +5,11 @@ import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 import githubRouter from "./routes/github.routes.js";
+import { inngestServe } from "./inngest/serve.js";
 
 const app = express();
+
+console.log("Helo World! Server is starting...");
 
 app.use(
   cors({
@@ -35,6 +38,8 @@ app.use("/health", (req, res) => {
 });
 
 app.use("/api/github", githubRouter);
+
+app.use("/api/inngest", inngestServe);
 
 app.use((req, res) => {
   console.log("404 HIT:", req.method, req.originalUrl);
