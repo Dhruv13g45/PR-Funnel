@@ -9,7 +9,6 @@ import { inngestServe } from "./inngest/serve.js";
 
 const app = express();
 
-console.log("Helo World! Server is starting...");
 
 app.use(
   cors({
