@@ -24,6 +24,7 @@ export const prReviewPipeline = inngestClient.createFunction(
     });
 
     const files = await step.run("Fetch PR Files", async () => {
+      console.log("FILES:", files);
       const { installationId, owner, repo, prNumber } = event?.data;
       return await getPullRequestFiles(installationId, owner, repo, prNumber);
     });
