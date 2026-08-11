@@ -136,3 +136,37 @@ export async function getPullRequestFiles(
 
   return data;
 }
+
+export async function getRepositoryFile(
+  installationId: number,
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+) {
+  const octokit = await githubApp.getInstallationOctokit(installationId);
+
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/contents/{path}",
+    {
+      owner,
+      repo,
+      path,
+      ref,
+    },
+  );
+
+  if (Array.isArray(data)) {
+    throw new Error(`Expected a file but received a directory: ${path}`);
+  }
+
+  if (!("content" in data) || !data.content) {
+    throw new Error(`No content found for file: ${path}`);
+  }
+
+  return {
+    path,
+    sha: data.sha,
+    content: Buffer.from(data.content, "base64").toString("utf-8"),
+  };
+}

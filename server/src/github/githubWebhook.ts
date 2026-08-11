@@ -17,18 +17,18 @@ githubWebhooks.on("pull_request.opened", async ({ payload }) => {
   console.log({
     insId: payload?.installation?.id,
     ownerlogin: payload?.repository?.owner?.login,
-    reponame: payload?.repository?.name,
+    repoFullName: payload.repository.full_name,
     prnum: payload?.pull_request?.number,
   });
 
   const pullRequest = await createPullRequest({
-    installationId: payload?.installation!?.id,
+    installationId: payload?.installation!.id,
     repoFullName: payload?.repository.name,
-    prNumber: payload?.pull_request?.number,
-    authorLogin: payload?.repository?.owner?.name!,
-    title: payload?.pull_request?.title,
-    headSha: payload?.pull_request?.head?.sha,
-    baseBranch: payload?.pull_request?.base?.ref,
+    prNumber: payload.pull_request.number,
+    authorLogin: payload.pull_request.user.login,
+    title: payload.pull_request.title,
+    headSha: payload.pull_request.head.sha,
+    baseBranch: payload.pull_request.base.ref,
   });
 
   await inngestClient.send({
@@ -40,6 +40,7 @@ githubWebhooks.on("pull_request.opened", async ({ payload }) => {
       repo: payload.repository.name,
       repoFullName: payload.repository.full_name,
       prNumber: payload.pull_request.number,
+      headSha: payload.pull_request.head.sha,
     },
   });
 });
