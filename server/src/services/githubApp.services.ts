@@ -61,54 +61,60 @@ export async function saveInstallationDetails(
 }
 
 export async function githubDisconnectService(userId: string) {
-  if (userId) {
-    const installation = await prisma.githubInstallation.findUnique({
+  if (!userId) {
+    return {
+      message: "No user id found",
+      success: false,
+    };
+  }
+
+  const installation = await prisma.githubInstallation.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (!installation) {
+    return {
+      message: "No GitHub installation found",
+      success: false,
+    };
+  }
+
+  const installationId = Number(installation.installationId);
+
+  try {
+    const response = await githubApp.octokit.request(
+      "DELETE /app/installations/{installation_id}",
+      {
+        installation_id: installationId,
+        headers: {
+          "X-GitHub-Api-Version": "2026-03-10",
+          Accept: "application/vnd.github+json",
+        },
+      },
+    );
+
+    console.log("GitHub uninstall response:", response.status);
+
+    await prisma.githubInstallation.delete({
       where: {
         userId,
       },
     });
 
-    if (!installation) {
-      console.log("No installation found");
-      return null;
-    }
+    return {
+      message: "GitHub App uninstalled successfully",
+      success: true,
+    };
+  } catch (error: any) {
+    console.error("GitHub disconnect error:", error);
 
-    const installationId = Number(installation.installationId);
-
-    if (installationId) {
-      try {
-        await githubApp.octokit.request(
-          "DELETE /app/installations/{installation_id}",
-          {
-            installation_id: installationId,
-          },
-        );
-
-        await prisma.githubInstallation.delete({
-          where: {
-            userId,
-          },
-        });
-
-        return {
-          message: "Installtion deleted",
-          success: true,
-        };
-      } catch (error) {
-        console.log(error);
-        return error;
-      }
-    } else {
-      return {
-        message: "no installation id found",
-        success: false,
-      };
-    }
+    return {
+      message: error?.message || "Failed to uninstall GitHub App",
+      success: false,
+    };
   }
-  return {
-    message: "no user id found",
-    success: false,
-  };
 }
 
 export async function getPullRequestFiles(
