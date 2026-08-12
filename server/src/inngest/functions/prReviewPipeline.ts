@@ -32,28 +32,32 @@ export const prReviewPipeline = inngestClient.createFunction(
       console.log(files);
     });
 
-    const fileContents = await step.run("Fetch the file contents", () => {
+    const fileContents = await step.run("Fetch PR File Contents", async () => {
+      const results = [];
       const { installationId, owner, repo, headSha } = event?.data;
 
-      return Promise.all(
-        files.map((file) => {
-          getRepositoryFile(
-            installationId,
-            owner,
-            repo,
-            file.filename,
-            headSha,
-          );
-        }),
-      );
+      for (const file of files) {
+        if (file.status === "removed") {
+          console.log(`Skipping deleted file: ${file.filename}`);
+          continue;
+        }
+
+        const content = await getRepositoryFile(
+          installationId,
+          owner,
+          repo,
+          file.filename,
+          headSha,
+        );
+
+        results.push(content);
+      }
+
+      return results;
     });
 
-    await step.run("Logging the file contents", () => {
+    await step.run("Log the file contents", async () => {
       console.log(fileContents);
     });
-
-    return {
-      success: true,
-    };
   },
 );
