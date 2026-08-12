@@ -36,6 +36,8 @@ app.use("/health", (req, res) => {
   });
 });
 
+console.log("New test pr log for different files")
+
 app.use("/api/github", githubRouter);
 
 app.use("/api/inngest", inngestServe);

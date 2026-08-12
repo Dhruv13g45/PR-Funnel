@@ -95,8 +95,6 @@ export async function githubDisconnectService(userId: string) {
       },
     );
 
-    console.log("GitHub uninstall response:", response.status);
-
     await prisma.githubInstallation.delete({
       where: {
         userId,
@@ -169,4 +167,43 @@ export async function getRepositoryFile(
     sha: data.sha,
     content: Buffer.from(data.content, "base64").toString("utf-8"),
   };
+}
+
+export default function filterRelevantFiles(files: []) {
+  const ignoredExtensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".ico",
+    ".webp",
+    ".mp4",
+    ".mp3",
+    ".zip",
+    ".pdf",
+    ".lock",
+  ];
+
+  const ignoredPaths = [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    "coverage/",
+  ];
+
+  return files.filter((file) => {
+    //@ts-ignore
+    const filename = file.filename.toLowerCase();
+    const hasIgnoredExtension = ignoredExtensions.some((extension) =>
+      filename.endsWith(extension),
+    );
+
+    const hasIgnoredPath = ignoredPaths.some((path) => filename.includes(path));
+
+
+    return !hasIgnoredExtension && !hasIgnoredPath
+
+  });
 }

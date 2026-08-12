@@ -1,4 +1,4 @@
-import {
+import filterRelevantFiles, {
   getPullRequestFiles,
   getRepositoryFile,
 } from "../../services/githubApp.services.js";
@@ -52,8 +52,12 @@ export const prReviewPipeline = inngestClient.createFunction(
       console.log(fileContents);
     });
 
-    return {
-      success: true,
-    };
+    const relevantFiles = await step.run("Filter relevant files", async () => {
+      return filterRelevantFiles(files as unknown as []);
+    });
+
+    await step.run("Log the relevent files", async () => {
+      console.log(relevantFiles);
+    });
   },
 );
