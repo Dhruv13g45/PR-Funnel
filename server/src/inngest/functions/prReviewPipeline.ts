@@ -1,8 +1,10 @@
 import {
   getPullRequestFiles,
   getRepositoryFile,
+  filterRelevantFiles,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
+import { chunkCode } from "../../utils/chunkCode.js";
 import { inngestClient } from "../client.js";
 
 export const prReviewPipeline = inngestClient.createFunction(
@@ -58,6 +60,22 @@ export const prReviewPipeline = inngestClient.createFunction(
 
     await step.run("Log the file contents", async () => {
       console.log(fileContents);
+    });
+
+    const relevantFiles = await step.run("Filter relevant files", async () => {
+      return filterRelevantFiles(fileContents);
+    });
+
+    await step.run("Log the relevant files", async () => {
+      console.log(relevantFiles);
+    });
+
+    const chunks = await step.run("Chunk Code", async () => {
+      return chunkCode(fileContents);
+    });
+
+    await step.run("Log the chunks", async () => {
+      console.log(chunks);
     });
   },
 );
