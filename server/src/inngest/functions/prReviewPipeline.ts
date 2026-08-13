@@ -1,8 +1,10 @@
 import {
   getPullRequestFiles,
   getRepositoryFile,
+  filterRelevantFiles,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
+import { chunkCode } from "../../utils/chunkCode.js";
 import { inngestClient } from "../client.js";
 
 export const prReviewPipeline = inngestClient.createFunction(
@@ -32,28 +34,48 @@ export const prReviewPipeline = inngestClient.createFunction(
       console.log(files);
     });
 
-    const fileContents = await step.run("Fetch the file contents", () => {
+    const fileContents = await step.run("Fetch PR File Contents", async () => {
+      const results = [];
       const { installationId, owner, repo, headSha } = event?.data;
 
-      return Promise.all(
-        files.map((file) => {
-          getRepositoryFile(
-            installationId,
-            owner,
-            repo,
-            file.filename,
-            headSha,
-          );
-        }),
-      );
+      for (const file of files) {
+        if (file.status === "removed") {
+          console.log(`Skipping deleted file: ${file.filename}`);
+          continue;
+        }
+
+        const content = await getRepositoryFile(
+          installationId,
+          owner,
+          repo,
+          file.filename,
+          headSha,
+        );
+
+        results.push(content);
+      }
+
+      return results;
     });
 
-    await step.run("Logging the file contents", () => {
+    await step.run("Log the file contents", async () => {
       console.log(fileContents);
     });
 
-    return {
-      success: true,
-    };
+    const relevantFiles = await step.run("Filter relevant files", async () => {
+      return filterRelevantFiles(fileContents);
+    });
+
+    await step.run("Log the relevant files", async () => {
+      console.log(relevantFiles);
+    });
+
+    const chunks = await step.run("Chunk Code", async () => {
+      return chunkCode(fileContents);
+    });
+
+    await step.run("Log the chunks", async () => {
+      console.log(chunks);
+    });
   },
 );

@@ -6,3 +6,5 @@ export const inngestServe = serve({
   client: inngestClient,
   functions: [prReviewPipeline],
 });
+
+console.log("inngest serve log demo");

@@ -170,3 +170,41 @@ export async function getRepositoryFile(
     content: Buffer.from(data.content, "base64").toString("utf-8"),
   };
 }
+
+export function filterRelevantFiles(files: any[]) {
+  const ignoredExtensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".ico",
+    ".webp",
+    ".mp4",
+    ".mp3",
+    ".zip",
+    ".pdf",
+    ".lock",
+  ];
+
+  const ignoredPaths = [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    "coverage/",
+  ];
+
+  return files.filter((file) => {
+    const filename = file.filename.toLowerCase();
+
+    const hasIgnoredExtension = ignoredExtensions.some((extension) =>
+      filename.endsWith(extension),
+    );
+
+    const hasIgnoredPath = ignoredPaths.some((path) => filename.includes(path));
+
+
+    return !hasIgnoredExtension && !hasIgnoredPath;
+  });
+}
