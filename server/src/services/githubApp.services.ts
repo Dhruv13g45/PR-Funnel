@@ -196,14 +196,18 @@ export function filterRelevantFiles(files: any[]) {
   ];
 
   return files.filter((file) => {
-    const filename = file.filename.toLowerCase();
+
+    if (!file.filename){
+      return false
+    }
+
+    const filename = file.filename.toLowercase();
 
     const hasIgnoredExtension = ignoredExtensions.some((extension) =>
       filename.endsWith(extension),
     );
 
     const hasIgnoredPath = ignoredPaths.some((path) => filename.includes(path));
-
 
     return !hasIgnoredExtension && !hasIgnoredPath;
   });

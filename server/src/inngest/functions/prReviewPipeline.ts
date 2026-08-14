@@ -1,3 +1,4 @@
+import { generateEmbeddings } from "../../services/embedding.services.js";
 import {
   getPullRequestFiles,
   getRepositoryFile,
@@ -76,6 +77,15 @@ export const prReviewPipeline = inngestClient.createFunction(
 
     await step.run("Log the chunks", async () => {
       console.log(chunks);
+    });
+
+    const embeddings = await step.run("Generate Embeddings", async () => {
+      return generateEmbeddings(chunks[0]?.content || "");
+    });
+
+    await step.run("Log the embeddings", async () => {
+      console.log("Embedding length", embeddings.length);
+      console.log("First ten lines of the embedding", embeddings.slice(0, 10));
     });
   },
 );
