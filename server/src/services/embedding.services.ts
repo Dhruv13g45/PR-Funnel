@@ -6,7 +6,7 @@ const ai = new GoogleGenAI({
 
 export async function generateEmbeddings(text: string) {
   const response = await ai.models.embedContent({
-    model: "gemini-eembedding-001",
+    model: "gemini-embedding-001",
     contents: text,
     config: {
       taskType: "RETRIEVAL_DOCUMENT",
