@@ -160,6 +160,8 @@ export async function getRepositoryFile(
     throw new Error(`Expected a file but received a directory: ${path}`);
   }
 
+  console.log("File data", data);
+
   if (!("content" in data) || !data.content) {
     throw new Error(`No content found for file: ${path}`);
   }
@@ -196,18 +198,26 @@ export function filterRelevantFiles(files: any[]) {
   ];
 
   return files.filter((file) => {
-
-    if (!file.filename){
-      return false
+    console.log("Filtering file:", file);
+    if (!file.path) {
+      return false;
     }
 
-    const filename = file.filename.toLowercase();
+    const filename = file.path.toLowerCase();
 
     const hasIgnoredExtension = ignoredExtensions.some((extension) =>
       filename.endsWith(extension),
     );
 
     const hasIgnoredPath = ignoredPaths.some((path) => filename.includes(path));
+
+    console.log(
+      filename,
+      "hasIgnoredExtension:",
+      hasIgnoredExtension,
+      "hasIgnoredPath:",
+      hasIgnoredPath,
+    );
 
     return !hasIgnoredExtension && !hasIgnoredPath;
   });
