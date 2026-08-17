@@ -9,7 +9,6 @@ import { inngestServe } from "./inngest/serve.js";
 
 const app = express();
 
-
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -27,6 +26,7 @@ app.use(
     verify: (req: any, res, buffer) => {
       req.rawBody = buffer;
     },
+    limit: "10mb",
   }),
 );
 

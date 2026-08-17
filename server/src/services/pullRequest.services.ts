@@ -1,6 +1,5 @@
 import { prisma } from "../db/db.js";
 
-
 export async function markPullRequestProcessing(reviewId: string) {
   return await prisma.pullRequest.update({
     where: {
@@ -11,7 +10,6 @@ export async function markPullRequestProcessing(reviewId: string) {
     },
   });
 }
-
 
 type PullRequest = {
   installationId: number;
@@ -44,6 +42,28 @@ export async function createPullRequest({
         baseBranch,
       },
     });
+  } catch (error) {
+    console.log(error);
+    throw new Error("Internal error occured");
+  }
+}
+
+export async function savePullRequestReview(
+  reviewId: string,
+  reviewComment: string,
+) {
+  try {
+
+    return await prisma.pullRequest.update({
+      where:{
+        id: reviewId,
+      },
+      data:{
+        reviewComment,
+        status: "Completed",
+        reviewedAt: new Date(),
+      },
+    })
   } catch (error) {
     console.log(error);
     throw new Error("Internal error occured");
