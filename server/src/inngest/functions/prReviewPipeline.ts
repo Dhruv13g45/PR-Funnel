@@ -3,6 +3,7 @@ import {
   getPullRequestFiles,
   getRepositoryFile,
   filterRelevantFiles,
+  postPullRequestReview,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
 import { retrieveRepositoryContext } from "../../services/repository.services.js";
@@ -17,6 +18,7 @@ import {
   generateCodeReview,
   savePullRequestReview,
 } from "../../services/aiReview.services.js";
+import { formatReviewForGithub } from "../../utils/formatReviewForGithub.js";
 
 export const prReviewPipeline = inngestClient.createFunction(
   {
@@ -146,6 +148,20 @@ export const prReviewPipeline = inngestClient.createFunction(
         );
       }
       return savePullRequestReview(reviewId, JSON.stringify(aiReview));
+    });
+
+    await step.run("Post the ai review to github", async () => {
+      const { installationId, owner, repo, prNumber } = event?.data;
+
+      const formattedAiReview = formatReviewForGithub(aiReview ?? "");
+
+      return postPullRequestReview(
+        installationId,
+        owner,
+        repo,
+        formattedAiReview,
+        prNumber,
+      );
     });
   },
 );

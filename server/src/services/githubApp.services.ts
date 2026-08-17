@@ -222,3 +222,27 @@ export function filterRelevantFiles(files: any[]) {
     return !hasIgnoredExtension && !hasIgnoredPath;
   });
 }
+
+
+export async function postPullRequestReview(installationId: number, owner: string, repo: string, body: string, prNumber: string){
+  try {
+    const octokit = await getInstallationOctokit(installationId)
+
+    const response = await octokit.request(
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+      {
+        owner,
+        repo, 
+        pull_number: Number(prNumber),
+        body,
+        event: "COMMENT"
+      }
+    )
+
+    return response.data
+    
+  } catch (error) {
+    console.log(error)
+    throw new Error("Error in the post pull request review service")
+  }
+}
