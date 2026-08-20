@@ -6,9 +6,14 @@ import {
   postPullRequestReview,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
-import { retrieveRepositoryContext } from "../../services/repository.services.js";
+import {
+  buildPreviousPRContext,
+  formatPreviousPRContext,
+  retrieveRepositoryContext,
+} from "../../services/repository.services.js";
 import {
   querySimilarCode,
+  searchPreviousPRCode,
   searchSimilarCode,
   storeCodeChunk,
 } from "../../services/vector.services.js";
@@ -108,6 +113,49 @@ export const prReviewPipeline = inngestClient.createFunction(
       }
     });
 
+    const previousPRContext = await step.run(
+      "Retrieve Previous PR Context",
+      async () => {
+        const repository = `${event.data.owner}/${event.data.repo}`;
+        const currentPrNumber = event.data.prNumber;
+
+        const results = [];
+
+        for (const chunk of chunks) {
+          const matches = await searchPreviousPRCode(
+            chunk.content,
+            repository,
+            currentPrNumber,
+          );
+
+          results.push({
+            currentChunk: chunk,
+            matches,
+          });
+        }
+
+        return results;
+      },
+    );
+
+    const previousPRs = await step.run(
+      "Build Previous PR Context",
+      async () => {
+        return buildPreviousPRContext(previousPRContext);
+      },
+    );
+
+    const formattedPreviousPRContext = await step.run(
+      "Format the previous pr context",
+      async () => {
+        return formatPreviousPRContext(previousPRs);
+      },
+    );
+
+    await step.run("Debug previous pr formatting", async () => {
+      console.log(formattedPreviousPRContext);
+    });
+
     const relevantCode = await step.run(
       "Retrieve Repository Context",
       async () => {
@@ -130,7 +178,11 @@ export const prReviewPipeline = inngestClient.createFunction(
         .filter((content): content is string => Boolean(content))
         .join("\n\n");
 
-      const response = await generateCodeReview(changedCode, repositoryContext);
+      const response = await generateCodeReview(
+        changedCode,
+        repositoryContext,
+        formattedPreviousPRContext,
+      );
       const responseText = response ?? "{}";
 
       return JSON.parse(responseText);
