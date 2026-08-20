@@ -51,17 +51,11 @@ export async function deleteRepositoryVectors(repository: string) {
   });
 }
 
+export async function searchSimilarCode(query: string, repository: string) {
+  const embedding = await generateEmbeddings(query);
 
-
-export async function searchSimilarCode(
-    query: string,
-    repository: string,
-){
-    const embedding = await generateEmbeddings(query)
-
-    return await querySimilarCode(embedding, repository, 5)
+  return await querySimilarCode(embedding, repository, 5);
 }
-
 
 export async function retrieveRelevantCode(
   chunks: {
@@ -73,10 +67,7 @@ export async function retrieveRelevantCode(
   const results = [];
 
   for (const chunk of chunks) {
-    const matches = await searchSimilarCode(
-      chunk.content,
-      repository,
-    );
+    const matches = await searchSimilarCode(chunk.content, repository);
 
     results.push({
       queryFile: chunk.path,
@@ -85,4 +76,55 @@ export async function retrieveRelevantCode(
   }
 
   return results;
+}
+
+export async function searchPreviousPRContext(
+  embedding: number[],
+  repository: string,
+  currentPrNumber: number,
+  topK: number = 10,
+) {
+  try {
+    const result = await pineconeIndex.query({
+      vector: embedding,
+      topK,
+      includeMetadata: true,
+      filter: {
+        $and: [
+          {
+            repository: {
+              $eq: repository,
+            },
+          },
+          {
+            pullRequestNumber: {
+              $ne: currentPrNumber,
+            },
+          },
+        ],
+      },
+    });
+
+    return result.matches;
+  } catch (error) {
+    console.log(error);
+    console.log("Error in searching previous pr context");
+  }
+}
+
+export async function searchPreviousPRCode(
+  query: string,
+  repository: string,
+  currentPrNumber: number,
+) {
+  const embedding = await generateEmbeddings(query);
+
+  try {
+    return searchPreviousPRContext(embedding, repository, currentPrNumber, 10);
+  } catch (error) {
+    console.log(error);
+    console.log(
+      "Error in searching the previous code from pinecone helper function",
+    );
+  }
 }
