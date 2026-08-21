@@ -4,6 +4,8 @@ import {
   getRepositoryFile,
   filterRelevantFiles,
   postPullRequestReview,
+  extractChangedLines,
+  validateReviewLocations,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
 import {
@@ -48,6 +50,10 @@ export const prReviewPipeline = inngestClient.createFunction(
       return await getPullRequestFiles(installationId, owner, repo, prNumber);
     });
 
+    const changedLines = await step.run("Extract Changed Lines", async () => {
+      return extractChangedLines(files);
+    });
+
     const fileContents = await step.run("Fetch PR File Contents", async () => {
       console.log("Fetching file contents for fetch PR files:", files);
       const results = [];
@@ -78,11 +84,6 @@ export const prReviewPipeline = inngestClient.createFunction(
       return filterRelevantFiles(fileContents);
     });
 
-    await step.run("Debug relevant files", async () => {
-      console.log("Relevant files count:", relevantFiles.length);
-      console.dir(relevantFiles, { depth: null });
-    });
-
     const chunks = await step.run("Chunk Code", async () => {
       const result = chunkCode(relevantFiles);
 
@@ -91,11 +92,6 @@ export const prReviewPipeline = inngestClient.createFunction(
       }
 
       return result;
-    });
-
-    await step.run("Debug chunks", async () => {
-      console.log("Chunks count:", chunks.length);
-      console.dir(chunks, { depth: null });
     });
 
     await step.run("Generate and store embeddings", async () => {
@@ -109,6 +105,8 @@ export const prReviewPipeline = inngestClient.createFunction(
           pullRequestNumber: event?.data.prNumber,
           filePath: chunk.path,
           content: chunk.content,
+          startLine: chunk.startLine,
+          endLine: chunk.endLine,
         });
       }
     });
@@ -168,7 +166,16 @@ export const prReviewPipeline = inngestClient.createFunction(
     const aiReview = await step.run("Generate AI Code Review", async () => {
       const changedCode = chunks
         .map((chunk) => {
-          return `File: ${chunk.path}\n\n${chunk.content}`;
+          const numberedCode = chunk.content
+            .split("\n")
+            .map((line, index) => {
+              const lineNumber = chunk.startLine + index;
+
+              return `${lineNumber}: ${line}`;
+            })
+            .join("\n");
+
+          return `File: ${chunk.path} Lines ${chunk.startLine}-${chunk.endLine} ${numberedCode}`;
         })
         .join("\n\n---\n\n");
 
@@ -183,13 +190,36 @@ export const prReviewPipeline = inngestClient.createFunction(
         repositoryContext,
         formattedPreviousPRContext,
       );
-      const responseText = response ?? "{}";
 
-      return JSON.parse(responseText);
+      const responseText = response?.trim();
+
+      if (!responseText) {
+        throw new Error("Gemini returned an empty response");
+      }
+
+      try {
+        return JSON.parse(responseText);
+      } catch (error) {
+        console.error("Gemini returned invalid JSON:");
+        console.error(responseText);
+
+        throw new Error("Gemini returned invalid JSON");
+      }
     });
 
     await step.run("Log ai review", async () => {
       console.log(aiReview);
+    });
+
+    const validatedReview = await step.run(
+      "Validate the ai review locations",
+      async () => {
+        return validateReviewLocations(aiReview, changedLines);
+      },
+    );
+
+    await step.run("Debug Validated Review", async () => {
+      console.log("Validated Review:", validatedReview);
     });
 
     await step.run("Save AI code review", async () => {

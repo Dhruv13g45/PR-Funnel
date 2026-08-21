@@ -137,6 +137,85 @@ export async function getPullRequestFiles(
   return data;
 }
 
+export function extractChangedLines(files: any[]) {
+  const changedLines: {
+    file: string;
+    lines: number[];
+  }[] = [];
+
+  for (const file of files) {
+    if (!file.patch) {
+      continue;
+    }
+
+    const lines: number[] = [];
+
+    const patchLines = file.patch.split("\n");
+
+    let newLineNumber = 0;
+
+    for (const line of patchLines) {
+      const match = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+
+      if (match) {
+        newLineNumber = Number(match[1]);
+        continue;
+      }
+
+      if (line.startsWith("+") && !line.startsWith("+++")) {
+        lines.push(newLineNumber);
+        newLineNumber++;
+        continue;
+      }
+
+      if (line.startsWith("-") && !line.startsWith("---")) {
+        continue;
+      }
+
+      newLineNumber++;
+    }
+
+    changedLines.push({
+      file: file.filename,
+      lines,
+    });
+  }
+
+  return changedLines;
+}
+
+export async function validateReviewLocations(
+  review: any,
+  changedLines: {
+    file: string;
+    lines: number[];
+  }[],
+) {
+  if (!review?.issues?.length) {
+    return {
+      issues: [],
+    };
+  }
+
+  const validIssues = review.issues.filter((issue: any) => {
+    if (!issue.file || !issue.line) {
+      return false;
+    }
+
+    const changedFile = changedLines.find((file) => file.file === issue.file);
+
+    if (!changedFile) {
+      return false;
+    }
+
+    return changedFile.lines.includes(Number(issue.line));
+  });
+
+  return {
+    issues: validIssues,
+  };
+}
+
 export async function getRepositoryFile(
   installationId: number,
   owner: string,
@@ -223,26 +302,30 @@ export function filterRelevantFiles(files: any[]) {
   });
 }
 
-
-export async function postPullRequestReview(installationId: number, owner: string, repo: string, body: string, prNumber: string){
+export async function postPullRequestReview(
+  installationId: number,
+  owner: string,
+  repo: string,
+  body: string,
+  prNumber: string,
+) {
   try {
-    const octokit = await getInstallationOctokit(installationId)
+    const octokit = await getInstallationOctokit(installationId);
 
     const response = await octokit.request(
       "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
       {
         owner,
-        repo, 
+        repo,
         pull_number: Number(prNumber),
         body,
-        event: "COMMENT"
-      }
-    )
+        event: "COMMENT",
+      },
+    );
 
-    return response.data
-    
+    return response.data;
   } catch (error) {
-    console.log(error)
-    throw new Error("Error in the post pull request review service")
+    console.log(error);
+    throw new Error("Error in the post pull request review service");
   }
 }

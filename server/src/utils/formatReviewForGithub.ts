@@ -5,7 +5,14 @@ export function formatReviewForGithub(review: any) {
     markdown += `### Issues Found\n\n`;
 
     for (const issue of review.issues) {
+      // const source =
+      //   issue.source === "previous_pr_comparison"
+      //     ? "Previous PR Comparison"
+      //     : "Current PR";
+
       markdown += `### ${issue.severity.toUpperCase()} — ${issue.title}\n\n`;
+      // markdown += `**Source:** ${source}\n\n`;
+      markdown += `### File: ${issue.file} - Line no: ${issue.line}`
 
       markdown += `**Problem**\n\n`;
       markdown += `${issue.description}\n\n`;
@@ -18,8 +25,7 @@ export function formatReviewForGithub(review: any) {
   } else {
     markdown += `### ✅ No significant issues found\n\n`;
 
-    markdown +=
-      `No significant problems found in the changed code.\n`;
+    markdown += `No significant problems found in the changed code.\n`;
   }
 
   return markdown;

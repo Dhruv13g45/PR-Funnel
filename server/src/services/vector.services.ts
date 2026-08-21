@@ -9,6 +9,8 @@ export async function storeCodeChunk(
     pullRequestNumber: number;
     filePath: string;
     content: string;
+    startLine: number;
+    endLine: number;
   },
 ) {
   await pineconeIndex.upsert({
@@ -83,6 +85,7 @@ export async function searchPreviousPRContext(
   repository: string,
   currentPrNumber: number,
   topK: number = 10,
+  similarityThreshold: number = 0.8,
 ) {
   try {
     const result = await pineconeIndex.query({
@@ -105,10 +108,13 @@ export async function searchPreviousPRContext(
       },
     });
 
-    return result.matches;
+    return result.matches.filter(
+      (match) => (match.score ?? 0) >= similarityThreshold,
+    );
   } catch (error) {
     console.log(error);
     console.log("Error in searching previous pr context");
+    return [];
   }
 }
 
