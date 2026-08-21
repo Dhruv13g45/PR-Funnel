@@ -103,58 +103,47 @@ Only report an issue when you can identify a reliable location in the current PR
 
 Return ONLY valid JSON.
 
-Do not include:
-
-- Markdown
-- Code fences
-- Explanations before the JSON
-- Explanations after the JSON
-- Any conversational text
-
-The response MUST begin with "{" and end with "}".
-
-Use exactly this structure:
+Always use exactly this structure:
 
 {
   "issues": [
     {
       "severity": "critical | high | medium | low",
-      "source": "current_pr | previous_pr_comparison",
-      "file": "Exact current PR file path",
-      "line": 42,
       "title": "Short title",
+      "file": "Exact current PR file path",
+      "line": 123,
+      "source": "current_pr | previous_pr_comparison",
       "description": "Explain the problem",
       "suggestion": "Explain how to fix it"
+    }
+  ],
+  "suggestions": [
+    {
+      "whatToImprove": "Short title on what to improve",
+      "description": "Explain the improvement",
+      "suggestion": "Explain how to improve it"
     }
   ]
 }
 
-Use:
-
-"source": "current_pr"
-
-when the issue is found through normal analysis of the current PR.
-
-Use:
-
-"source": "previous_pr_comparison"
-
-only when the issue is specifically caused by a problematic behavioral change, conflict, or regression compared with a previous related PR.
-
-If there are no significant issues, return exactly:
+If there are no issues, return:
 
 {
-  "issues": []
+  "issues": [],
+  "suggestions": []
 }
 
-Do not return a "suggestions" field.
-
-Only report actual issues.
+Do not include markdown.
+Do not include code fences.
+Do not include any text outside the JSON.
 `;
 
   const response = await ai.models.generateContent({
     model: "gemini-3.1-flash-lite",
     contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
   });
 
   return response.text;
