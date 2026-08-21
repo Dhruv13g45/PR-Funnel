@@ -50,22 +50,16 @@ export async function createPullRequest({
 
 export async function savePullRequestReview(
   reviewId: string,
-  reviewComment: string,
+  aiReview: string,
 ) {
-  try {
-
-    return await prisma.pullRequest.update({
-      where:{
-        id: reviewId,
-      },
-      data:{
-        reviewComment,
-        status: "Completed",
-        reviewedAt: new Date(),
-      },
-    })
-  } catch (error) {
-    console.log(error);
-    throw new Error("Internal error occured");
-  }
+  return prisma.pullRequest.update({
+    where: {
+      id: reviewId,
+    },
+    data: {
+      reviewComment: aiReview,
+      status: "completed",
+      reviewedAt: new Date(),
+    },
+  });
 }

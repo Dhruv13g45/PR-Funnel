@@ -9,6 +9,8 @@ export interface CodeChunk {
   sha: string;
   content: string;
   chunkIndex: number;
+  startLine: number;
+  endLine: number;
 }
 
 export function chunkCode(files: CodeFile[], chunkSize = 100): CodeChunk[] {
@@ -25,6 +27,8 @@ export function chunkCode(files: CodeFile[], chunkSize = 100): CodeChunk[] {
         sha: file.sha,
         content: chunkLines.join("\n"),
         chunkIndex: Math.floor(i / chunkSize),
+        startLine: Number(i + 1),
+        endLine: Math.min(i + chunkSize, lines.length),
       });
     }
   }

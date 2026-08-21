@@ -13,35 +13,28 @@ export async function generateCodeReview(
   const prompt = `
 You are an expert software engineer performing a code review.
 
-Review the following changed code from a pull request.
+Your task is to review the CURRENT pull request using:
+1. The current PR code
+2. Relevant repository context
+3. Related code from previous pull requests
 
-## Changed Code of current pr for current pr context
+## CURRENT PR CODE
 
 ${changedCode}
 
-## Relevant Repository Context
+## RELEVANT REPOSITORY CONTEXT
 
 ${repositoryContext}
 
-## Changed Code of previous pr for pervious pr context
+## PREVIOUS RELATED PR CONTEXT
 
 ${formattedPreviousPRContext}
 
-Use the previous related pull requests as historical context.
+---
 
-When reviewing the current pull request:
+## A. CURRENT PR CODE REVIEW
 
-1. Identify what the current PR changes.
-2. Identify relevant behavior or code that existed in previous PRs.
-3. Determine whether the current PR conflicts with or bypasses behavior introduced previously.
-4. Determine whether the current PR could introduce a regression.
-5. Consider whether a previous implementation appears to have been intentionally changed or replaced.
-6. Continue to identify normal bugs, security issues, performance problems, and correctness issues in the current PR.
-
-Do not assume that a difference from a previous PR is automatically a bug.
-Only report an issue when there is reasonable evidence that the current implementation causes a problem.
-
-Analyze the changed code for:
+Analyze the current PR for:
 
 - Bugs
 - Logical errors
@@ -50,10 +43,75 @@ Analyze the changed code for:
 - Incorrect error handling
 - Edge cases
 - Maintainability problems
+- Incorrect behavior
+- Data integrity problems
 
-Only report issues that are actually relevant.
+Only report issues that are actually relevant and supported by the provided code.
 
-Return your response ONLY as valid JSON.
+---
+
+## B. HISTORICAL COMPARISON
+
+Use previous related pull requests as historical context.
+
+For each relevant previous PR:
+
+1. Identify the specific behavior or logic present in the previous PR.
+2. Identify the corresponding behavior or logic in the current PR.
+3. Explain what changed.
+4. Determine whether the current implementation removes, weakens, bypasses, or contradicts important previous behavior.
+5. Determine the concrete consequence of that change.
+6. Determine whether that consequence represents a bug, security issue, performance problem, correctness problem, or regression.
+7. Consider whether the current PR intentionally replaced the previous behavior.
+8. Only report a historical issue when there is reasonable evidence that the current implementation introduces a real problem.
+
+A difference from a previous PR is NOT automatically an issue.
+
+Do NOT report historical differences involving:
+
+- Debug logging
+- Formatting
+- Variable naming
+- Refactoring
+- Code organization
+- Comments
+- Removal of temporary debugging code
+- Internal implementation details that do not affect observable behavior
+
+unless there is clear evidence that the change causes a real problem.
+
+When uncertain whether a historical difference represents a regression, do not report it.
+
+---
+
+## ISSUE LOCATION
+
+For every reported issue:
+
+- Return the exact file path from the CURRENT PR.
+- Return the exact line number where the issue occurs in the CURRENT PR.
+- The file path must match a file provided in the CURRENT PR CODE.
+- Do not invent file paths.
+- Do not use a file from a previous PR as the issue location.
+- Historical PRs may explain why something is problematic, but the reported location must always point to the CURRENT PR.
+
+Only report an issue when you can identify a reliable location in the current PR.
+
+---
+
+## RESPONSE FORMAT
+
+Return ONLY valid JSON.
+
+Do not include:
+
+- Markdown
+- Code fences
+- Explanations before the JSON
+- Explanations after the JSON
+- Any conversational text
+
+The response MUST begin with "{" and end with "}".
 
 Use exactly this structure:
 
@@ -61,6 +119,9 @@ Use exactly this structure:
   "issues": [
     {
       "severity": "critical | high | medium | low",
+      "source": "current_pr | previous_pr_comparison",
+      "file": "Exact current PR file path",
+      "line": 42,
       "title": "Short title",
       "description": "Explain the problem",
       "suggestion": "Explain how to fix it"
@@ -68,28 +129,27 @@ Use exactly this structure:
   ]
 }
 
-If there are no significant issues, return:
+Use:
+
+"source": "current_pr"
+
+when the issue is found through normal analysis of the current PR.
+
+Use:
+
+"source": "previous_pr_comparison"
+
+only when the issue is specifically caused by a problematic behavioral change, conflict, or regression compared with a previous related PR.
+
+If there are no significant issues, return exactly:
 
 {
   "issues": []
 }
 
-And if there are no issues or no major or significant issues then, return:
-{
-  "suggestions":
-  [
-    {
-      "whatToImprove": "Short title on what to improve",
-      "description": "Explain the improvement",
-      "suggestion": "Explain how to improve it"
-    }
-  ]
-}
+Do not return a "suggestions" field.
 
-
-Do not include markdown.
-Do not include code fences.
-Do not include any text outside the JSON.
+Only report actual issues.
 `;
 
   const response = await ai.models.generateContent({
@@ -104,19 +164,14 @@ export async function savePullRequestReview(
   reviewId: string,
   aiReview: string,
 ) {
-  try {
-    return prisma.pullRequest.update({
-      where: {
-        id: reviewId,
-      },
-      data: {
-        reviewComment: aiReview,
-        status: "completed",
-        reviewedAt: new Date(),
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
+  return prisma.pullRequest.update({
+    where: {
+      id: reviewId,
+    },
+    data: {
+      reviewComment: aiReview,
+      status: "completed",
+      reviewedAt: new Date(),
+    },
+  });
 }
