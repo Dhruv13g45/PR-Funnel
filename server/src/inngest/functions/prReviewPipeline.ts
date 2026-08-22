@@ -6,6 +6,8 @@ import {
   postPullRequestReview,
   extractChangedLines,
   validateReviewLocations,
+  formatGithubIssues,
+  createPullRequestReview,
 } from "../../services/githubApp.services.js";
 import { markPullRequestProcessing } from "../../services/pullRequest.services.js";
 import {
@@ -218,8 +220,29 @@ export const prReviewPipeline = inngestClient.createFunction(
       },
     );
 
-    await step.run("Debug Validated Review", async () => {
-      console.log("Validated Review:", validatedReview);
+    const githubLineReviews = await step.run(
+      "Format the line review issues for github",
+      async () => {
+        return formatGithubIssues(validatedReview?.issues || []);
+      },
+    );
+
+    await step.run("Post the line review issues on github", async () => {
+      if (!githubLineReviews.length) {
+        console.log("No inline review issues to post");
+        return;
+      }
+
+      const { installationId, owner, repo, prNumber, headSha } = event?.data;
+
+      return createPullRequestReview(
+        installationId,
+        owner,
+        repo,
+        prNumber,
+        headSha,
+        githubLineReviews,
+      );
     });
 
     await step.run("Save AI code review", async () => {

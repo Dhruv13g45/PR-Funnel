@@ -302,6 +302,34 @@ export function filterRelevantFiles(files: any[]) {
   });
 }
 
+export async function createPullRequestReview(
+  installationId: number,
+  owner: string,
+  repo: string,
+  pullNumber: number,
+  commitId: string,
+  comments: {
+    path: string;
+    line: number;
+    body: string;
+  }[],
+) {
+  const octokit = await githubApp.getInstallationOctokit(installationId);
+
+  return await octokit.request(
+    "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+    {
+      owner,
+      repo,
+      pull_number: pullNumber,
+      commit_id: commitId,
+      body: "## 🤖 PR-Funnel AI Code Review",
+      event: "COMMENT",
+      comments,
+    },
+  );
+}
+
 export async function postPullRequestReview(
   installationId: number,
   owner: string,
@@ -328,4 +356,22 @@ export async function postPullRequestReview(
     console.log(error);
     throw new Error("Error in the post pull request review service");
   }
+}
+
+export function formatGithubIssues(issues: []) {
+  return issues.map((issue: any) => ({
+    path: issue.file,
+    line: Number(issue.line),
+    body: `### ${issue.severity.toUpperCase()} — ${issue.title}
+
+**Problem**
+
+${issue.description}
+
+**Suggestion**
+
+${issue.suggestion}
+
+_Source: ${issue.source}_`,
+  }));
 }
