@@ -364,6 +364,7 @@ export function formatGithubIssues(issues: []) {
     line: Number(issue.line),
     body: `### ${issue.severity.toUpperCase()} — ${issue.title}
     \n
+    \n
 
 **Problem**
 
