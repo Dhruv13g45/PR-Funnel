@@ -40,14 +40,6 @@ app.use("/api/github", githubRouter);
 
 app.use("/api/inngest", inngestServe);
 
-app.use((req, res) => {
-  console.log("404 HIT:", req.method, req.originalUrl);
-
-  res.status(404).json({
-    message: "Route not found",
-  });
-});
-
 app.use((req, res, next) => {
   console.log("GLOBAL:", req.method, req.originalUrl);
   next();

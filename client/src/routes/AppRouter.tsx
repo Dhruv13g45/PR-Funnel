@@ -8,7 +8,6 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import SideBar from "@/components/layout/SideBar";
 import Repositories from "@/features/repositories/components/Repositories";
 import PullRequests from "@/features/pull-requests/components/PullRequests";
-import Reviews from "@/features/reviews/components/Reviews";
 import GithubApps from "@/features/github-apps/components/GithubApps";
 
 const AppRouter = () => {
@@ -30,7 +29,6 @@ const AppRouter = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/repositories" element={<Repositories />} />
               <Route path="/pull-requests" element={<PullRequests />} />
-              <Route path="/reviews" element={<Reviews />} />
               <Route path="/github-apps" element={<GithubApps />} />
             </Route>
           </Route>

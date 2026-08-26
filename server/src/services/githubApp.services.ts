@@ -1,5 +1,6 @@
 import { prisma } from "../db/db.js";
 import { githubApp } from "../github/githubApp.js";
+import { isRelevantRepositoryFile } from "./repository.services.js";
 
 export async function getInstallationOctokit(installationId: number) {
   return await githubApp.getInstallationOctokit(installationId);
@@ -375,3 +376,130 @@ ${issue.suggestion}
 _Source: ${issue.source}_`,
   }));
 }
+
+/////////////////////////////////  DRY PRINCIPLE VIOLATION CHECK LATER  ////////////////////////
+
+export async function getRepositoryCodebase(
+  installationId: number,
+  owner: string,
+  repo: string,
+  branch: string,
+) {
+  const octokit = await githubApp.getInstallationOctokit(installationId);
+
+  const { data: branchData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/branches/{branch}",
+    {
+      owner,
+      repo,
+      branch,
+    },
+  );
+
+  const commitSha = branchData.commit.sha;
+
+  const { data: commitData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/commits/{commit_sha}",
+    {
+      owner,
+      repo,
+      commit_sha: commitSha,
+    },
+  );
+
+  const treeSha = commitData.tree.sha;
+
+  const { data: treeData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+    {
+      owner,
+      repo,
+      tree_sha: treeSha,
+      recursive: "true",
+    },
+  );
+
+  if (treeData.truncated) {
+    throw new Error(
+      "Repository is too large. GitHub returned a truncated tree.",
+    );
+  }
+
+  const files = treeData.tree.filter(
+    (item) => item.type === "blob" && item.path,
+  );
+
+  const results = [];
+
+  for (const file of files) {
+    if (!file.path) {
+      continue;
+    }
+
+    if (!isRelevantRepositoryFile(file.path)) {
+      continue;
+    }
+
+    const content = await getRepositoryFile(
+      installationId,
+      owner,
+      repo,
+      file.path,
+      commitSha,
+    );
+
+    results.push(content);
+  }
+
+  return results;
+}
+
+export async function getRepositoryTree(
+  installationId: number,
+  owner: string,
+  repo: string,
+  branch: string,
+) {
+  const octokit = await githubApp.getInstallationOctokit(installationId);
+
+  const { data: branchData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/branches/{branch}",
+    {
+      owner,
+      repo,
+      branch,
+    },
+  );
+
+  const commitSha = branchData.commit.sha;
+
+  const { data: commitData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/commits/{commit_sha}",
+    {
+      owner,
+      repo,
+      commit_sha: commitSha,
+    },
+  );
+
+  const treeSha = commitData.tree.sha;
+
+  const { data: treeData } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+    {
+      owner,
+      repo,
+      tree_sha: treeSha,
+      recursive: "true",
+    },
+  );
+
+  console.log(treeData);
+
+  return {
+    commitSha,
+    tree: treeData.tree,
+  };
+}
+
+/////////////////////////////////  DRY PRINCIPLE VIOLATION CHECK LATER  ////////////////////////
