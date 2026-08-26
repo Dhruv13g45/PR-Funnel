@@ -71,6 +71,8 @@ export const repoSyncPipeline = inngestClient.createFunction(
         throw new Error("No repository code chunks were generated");
       }
 
+      console.log(result);
+
       return result;
     });
 
