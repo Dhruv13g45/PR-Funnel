@@ -8,6 +8,9 @@ import {
   repositorySyncController,
   getRepositorySyncStatusController,
   getAllRepoController,
+  getAllReviewsController,
+  getAllPullRequestsController,
+  getPullRequestDetailsController,
 } from "../controllers/github.controllers.js";
 
 const router = Router();
@@ -19,6 +22,9 @@ router.get("/callback", githubCallbackController);
 router.get("/installation-status", getGithubInstallationStatusController);
 
 router.get("/repositories", getAllRepoController);
+router.get("/reviews", getAllReviewsController);
+router.get("/pull-requests", getAllPullRequestsController);
+router.get("/pull-requests/detail", getPullRequestDetailsController);
 router.post("/sync", repositorySyncController);
 router.get("/sync/status", getRepositorySyncStatusController);
 

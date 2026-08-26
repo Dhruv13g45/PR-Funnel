@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
 import {
+  getAllReviewsService,
+  getAllPullRequestsService,
+  getPullRequestDetailsService,
   githubInstallationService,
   githubWebhookService,
 } from "../services/github.services.js";
@@ -215,6 +218,119 @@ export async function getAllRepoController(req: Request, res: Response) {
     return res.status(500).json({
       message: "Failed to fetch GitHub repositories",
       repositories: [],
+    });
+  }
+}
+
+export async function getAllReviewsController(req: Request, res: Response) {
+  try {
+    const userId = await getUserSession(req as any);
+
+    const installation = await prisma.githubInstallation.findUnique({
+      where: { userId },
+    });
+
+    if (!installation) {
+      return res.status(404).json({
+        message: "GitHub App is not installed",
+        reviews: [],
+      });
+    }
+
+    const reviews = await getAllReviewsService(
+      Number(installation.installationId),
+    );
+
+    return res.status(200).json({ reviews });
+  } catch (error) {
+    console.error("Error fetching AI reviews:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch AI reviews",
+      reviews: [],
+    });
+  }
+}
+
+export async function getAllPullRequestsController(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const userId = await getUserSession(req as any);
+    const installation = await prisma.githubInstallation.findUnique({
+      where: { userId },
+    });
+
+    if (!installation) {
+      return res.status(404).json({
+        message: "GitHub App is not installed",
+        pullRequests: [],
+      });
+    }
+
+    const pullRequests = await getAllPullRequestsService(
+      Number(installation.installationId),
+    );
+
+    const repositories = await getAllInstallationRepositories(
+      Number(installation.installationId),
+    );
+    const repositoryFullNames = new Map(
+      repositories.map((repository) => [repository.name, repository.full_name]),
+    );
+    const normalizedPullRequests = pullRequests.map((pullRequest) => ({
+      ...pullRequest,
+      repoFullName:
+        repositoryFullNames.get(pullRequest.repoFullName) ??
+        pullRequest.repoFullName,
+    }));
+
+    return res.status(200).json({ pullRequests: normalizedPullRequests });
+  } catch (error) {
+    console.error("Error fetching pull requests:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch pull requests",
+      pullRequests: [],
+    });
+  }
+}
+
+export async function getPullRequestDetailsController(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const userId = await getUserSession(req as any);
+    const installation = await prisma.githubInstallation.findUnique({
+      where: { userId },
+    });
+    const repoFullName = String(req.query.repo ?? "");
+    const pullNumber = Number(req.query.number);
+
+    if (!installation) {
+      return res.status(404).json({ message: "GitHub App is not installed" });
+    }
+
+    if (!repoFullName || !Number.isInteger(pullNumber)) {
+      return res.status(400).json({
+        message: "repo and number are required",
+      });
+    }
+
+    const pullRequest = await getPullRequestDetailsService(
+      Number(installation.installationId),
+      repoFullName,
+      pullNumber,
+    );
+
+    return res.status(200).json({ pullRequest });
+  } catch (error) {
+    console.error("Error fetching pull request details:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch pull request details",
     });
   }
 }
