@@ -23,7 +23,7 @@ githubWebhooks.on("pull_request.opened", async ({ payload }) => {
 
   const pullRequest = await createPullRequest({
     installationId: payload?.installation!.id,
-    repoFullName: payload?.repository.name,
+    repoFullName: payload?.repository.full_name,
     prNumber: payload.pull_request.number,
     authorLogin: payload.pull_request.user.login,
     title: payload.pull_request.title,
