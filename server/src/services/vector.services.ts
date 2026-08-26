@@ -6,11 +6,12 @@ export async function storeCodeChunk(
   embedding: number[],
   metadata: {
     repository: string;
-    pullRequestNumber: number;
+    pullRequestNumber?: number;
     filePath: string;
     content: string;
     startLine: number;
     endLine: number;
+    sourceType: "pr" | "repository"
   },
 ) {
   await pineconeIndex.upsert({

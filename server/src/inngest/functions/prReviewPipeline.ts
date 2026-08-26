@@ -109,6 +109,7 @@ export const prReviewPipeline = inngestClient.createFunction(
           content: chunk.content,
           startLine: chunk.startLine,
           endLine: chunk.endLine,
+          sourceType: "pr"
         });
       }
     });
