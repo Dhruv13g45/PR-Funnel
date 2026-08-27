@@ -131,7 +131,7 @@ const PullRequests = () => {
   const isError = repositoriesQuery.isError || pullRequestsQuery.isError;
 
   return (
-    <main className="min-h-screen w-full flex-1 overflow-y-auto bg-slate-950 text-slate-100">
+    <main className="min-h-full w-full flex-1 overflow-y-auto bg-slate-950 text-slate-100">
       <QuietInteractiveBackdrop>
         <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
           <header className="mb-8 flex flex-col gap-5 border-b border-slate-800/80 pb-7 md:flex-row md:items-end md:justify-between">

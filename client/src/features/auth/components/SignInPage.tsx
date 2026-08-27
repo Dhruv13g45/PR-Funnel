@@ -1,12 +1,10 @@
 import GithubButton from "@/features/auth/components/GithubButton";
 
 const SignInPage = () => {
-
-
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center px-6 py-10">
-      <section className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-900/95 p-8 shadow-[0_30px_60px_-30px_rgba(15,23,42,0.8)] backdrop-blur-xl">
-        <div className="mb-8 text-center">
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-8 text-slate-50 sm:px-6 sm:py-10">
+      <section className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-900/95 p-5 shadow-[0_30px_60px_-30px_rgba(15,23,42,0.8)] backdrop-blur-xl sm:p-8">
+        <div className="mb-7 text-center sm:mb-8">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-800 text-sky-300 shadow-inner shadow-slate-950/40">
             <svg
               viewBox="0 0 24 24"
@@ -33,7 +31,7 @@ const SignInPage = () => {
             <p className="font-medium text-slate-200">One click login</p>
             <p className="mt-2 leading-6">
               You will be redirected to GitHub to authenticate securely. After
-              approval, you’ll return to PR Funnel automatically.
+              approval, you'll return to PR Funnel automatically.
             </p>
           </div>
         </div>

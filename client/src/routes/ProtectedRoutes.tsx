@@ -1,5 +1,4 @@
 import { useSession } from "@/hooks/useSession";
-import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import LoadingScreen from "@/components/common/LoadingScreen";
 

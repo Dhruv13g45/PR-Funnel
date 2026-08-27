@@ -15,7 +15,7 @@ const GithubApps = () => {
 
   return (
     <div
-      className="relative isolate flex min-h-full items-center justify-center overflow-hidden bg-slate-950/40 p-6"
+      className="relative isolate flex min-h-full items-center justify-center overflow-hidden bg-slate-950/40 p-4 sm:p-6"
       onPointerMove={handlePointerMove}
       onPointerLeave={() => setPointer({ x: 50, y: 50 })}
       style={
