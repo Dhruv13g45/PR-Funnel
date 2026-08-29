@@ -44,6 +44,8 @@ app.use(
   getDashboardInfoController as unknown as RequestHandler,
 );
 
+console.log("Hello world");
+
 app.use("/api/inngest", inngestServe);
 
 app.use((req, res, next) => {
