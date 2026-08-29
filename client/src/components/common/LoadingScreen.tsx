@@ -3,24 +3,24 @@ import { GitBranch } from "lucide-react";
 
 export default function LoadingScreen() {
   return (
-    <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-slate-950 text-slate-100 font-sans select-none overflow-hidden relative">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-slate-950 font-sans text-slate-100 select-none">
       {/* Background ambient glows */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl" />
 
-      <div className="relative flex flex-col items-center gap-6 z-10">
+      <div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center">
         {/* Spinner Container */}
         <div className="relative w-16 h-16 flex items-center justify-center">
           {/* Pulsing glow outline */}
           <div className="absolute inset-0 rounded-full border border-sky-500/20 animate-pulse scale-110" />
-          
+
           {/* Rotating outer ring */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
             className="absolute inset-0 rounded-full border-t-2 border-r-2 border-transparent border-t-sky-400 border-r-indigo-400"
           />
-          
+
           {/* Inner pulsing Git Branch icon */}
           <motion.div
             animate={{ scale: [0.95, 1.05, 0.95] }}

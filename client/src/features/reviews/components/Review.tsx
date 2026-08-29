@@ -80,7 +80,7 @@ const Review = () => {
   );
 
   return (
-    <main className="min-h-full flex-1 overflow-y-auto bg-slate-950 text-slate-100">
+    <main className="min-h-full flex-1 overflow-x-hidden overflow-y-auto bg-slate-950 text-slate-100">
       <QuietInteractiveBackdrop>
         <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
           <header className="mb-8 flex flex-col gap-5 border-b border-slate-800/80 pb-7 md:flex-row md:items-end md:justify-between">
@@ -139,7 +139,7 @@ const Review = () => {
                 <button
                   type="button"
                   onClick={() => reviewsQuery.refetch()}
-                  className="ml-auto inline-flex items-center gap-2 rounded-md border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-sky-500/60 hover:text-sky-300"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-md border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-sky-500/60 hover:text-sky-300 sm:ml-auto"
                 >
                   <RefreshCw className="size-3.5" /> Retry
                 </button>
@@ -175,9 +175,9 @@ const Review = () => {
                 return (
                   <details
                     key={review.id}
-                    className="group rounded-xl border border-slate-800/80 bg-slate-900/45 open:border-sky-500/30 open:bg-slate-900/70"
+                    className="group w-full max-w-full overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/45 open:border-sky-500/30 open:bg-slate-900/70"
                   >
-                    <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-5 outline-none marker:hidden focus-visible:ring-2 focus-visible:ring-sky-500/60 [&::-webkit-details-marker]:hidden">
+                    <summary className="relative flex min-w-0 cursor-pointer list-none items-start gap-3 px-4 py-4 pr-12 outline-none marker:hidden focus-visible:ring-2 focus-visible:ring-sky-500/60 md:items-center md:gap-4 md:px-5 md:py-5 md:pr-12 [&::-webkit-details-marker]:hidden">
                       <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-slate-950 text-sky-400">
                         <GitBranch className="size-4" />
                       </span>
@@ -193,19 +193,21 @@ const Review = () => {
                             PR #{review.prNumber}
                           </Badge>
                         </span>
-                        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                        <span className="mt-1 flex min-w-0 flex-col items-start gap-1 text-xs text-slate-500 md:flex-row md:flex-wrap md:items-center md:gap-x-3">
                           <span>
                             branch:{" "}
                             <strong className="font-medium text-slate-300">
                               {review.baseBranch}
                             </strong>
                           </span>
-                          <span className="truncate">{review.title}</span>
+                          <span className="w-full truncate md:w-auto">
+                            {review.title}
+                          </span>
                         </span>
                       </span>
-                      <ChevronDown className="size-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180" />
+                      <ChevronDown className="absolute right-4 top-5 size-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180 md:top-1/2 md:-translate-y-1/2" />
                     </summary>
-                    <div className="border-t border-slate-800/80 px-5 py-6">
+                    <div className="border-t border-slate-800/80 px-4 py-5 sm:px-5 sm:py-6">
                       <div className="mb-5 flex flex-wrap items-center gap-3 text-xs text-slate-400">
                         <span className="inline-flex items-center gap-1.5">
                           <CheckCircle2 className="size-4 text-emerald-400" />{" "}
@@ -230,12 +232,12 @@ const Review = () => {
                                 <Badge className="bg-rose-500/15 text-rose-300">
                                   {issue.severity}
                                 </Badge>
-                                <h2 className="font-medium text-slate-200">
+                                <h2 className="min-w-0 break-words font-medium text-slate-200">
                                   {issue.title}
                                 </h2>
                               </div>
                               {issue.file && (
-                                <p className="mt-3 font-mono text-xs text-sky-400">
+                                <p className="mt-3 break-all font-mono text-xs text-sky-400">
                                   {issue.file}
                                   {issue.line ? `:${issue.line}` : ""}
                                 </p>

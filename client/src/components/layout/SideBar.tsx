@@ -9,6 +9,8 @@ import {
   Settings,
   UserCircle,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { authClient } from "@/lib/auth-client";
@@ -35,6 +37,7 @@ const SideBar = () => {
   });
 
   const [isResizing, setIsResizing] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
 
@@ -43,7 +46,7 @@ const SideBar = () => {
   const displayName = user?.user?.name || "GitHub user";
   const displayEmail = user?.user?.email || "No email available";
 
-  const MIN_WIDTH = 300;
+  const MIN_WIDTH = 240;
   const MAX_WIDTH = 450;
 
   const navItems = [
@@ -85,11 +88,22 @@ const SideBar = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-slate-950 font-sans text-slate-100">
+      {isMobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm md:hidden"
+        />
+      )}
       <aside
         ref={sidebarRef}
-        style={{ width }}
-        className="relative flex h-full flex-col shrink-0 border-r border-slate-900 bg-slate-950/80 backdrop-blur-xl select-none"
+        style={{ "--sidebar-width": `${width}px` } as React.CSSProperties}
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 flex w-[min(86vw,320px)] shrink-0 flex-col border-r border-slate-900 bg-slate-950/95 backdrop-blur-xl transition-transform duration-300 select-none md:relative md:w-[var(--sidebar-width)] md:translate-x-0 md:bg-slate-950/80",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}
       >
         <div className="flex h-full flex-col gap-6 overflow-hidden px-4 py-5">
           {/* Top Panel - Logo, Title & Profile Dropdown */}
@@ -175,6 +189,7 @@ const SideBar = () => {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={() => setIsMobileOpen(false)}
                   className={cn(
                     "relative flex items-center h-10 rounded-xl px-3 text-sm font-medium transition-all duration-200 outline-none group",
                     isActive
@@ -249,7 +264,25 @@ const SideBar = () => {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="min-w-0 flex-1 overflow-y-auto">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-900 bg-slate-950/90 px-4 py-3 backdrop-blur-xl md:hidden">
+          <button
+            type="button"
+            aria-label="Open navigation"
+            onClick={() => setIsMobileOpen(true)}
+            className="rounded-lg border border-slate-800 p-2 text-slate-300 transition hover:border-sky-500/40 hover:text-sky-300"
+          >
+            {isMobileOpen ? (
+              <X className="size-4" />
+            ) : (
+              <Menu className="size-4" />
+            )}
+          </button>
+          <span className="text-xs font-semibold tracking-wide text-slate-300">
+            PR Funnel
+          </span>
+          <span className="size-2 rounded-full bg-emerald-400" />
+        </div>
         <Outlet />
       </main>
     </div>

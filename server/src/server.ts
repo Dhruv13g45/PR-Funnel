@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type RequestHandler } from "express";
 import "dotenv/config";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,6 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 import githubRouter from "./routes/github.routes.js";
 import { inngestServe } from "./inngest/serve.js";
+import { getDashboardInfoController } from "./controllers/dashboard.controllers.js";
 
 const app = express();
 
@@ -37,6 +38,11 @@ app.use("/health", (req, res) => {
 });
 
 app.use("/api/github", githubRouter);
+
+app.use(
+  "/api/dashboard",
+  getDashboardInfoController as unknown as RequestHandler,
+);
 
 app.use("/api/inngest", inngestServe);
 

@@ -31,11 +31,24 @@ export async function createPullRequest({
   baseBranch,
 }: PullRequest) {
   try {
-    return await prisma.pullRequest.create({
-      data: {
+    return await prisma.pullRequest.upsert({
+      where: {
+        repoFullName_prNumber: {
+          repoFullName,
+          prNumber,
+        },
+      },
+      create: {
         installationId,
         repoFullName,
         prNumber,
+        authorLogin,
+        title,
+        headSha,
+        baseBranch,
+      },
+      update: {
+        installationId,
         authorLogin,
         title,
         headSha,

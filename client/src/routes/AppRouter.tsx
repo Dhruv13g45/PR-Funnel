@@ -10,21 +10,20 @@ import Repositories from "@/features/repositories/components/Repositories";
 import PullRequests from "@/features/pull-requests/components/PullRequests";
 import GithubApps from "@/features/github-apps/components/GithubApps";
 import Review from "@/features/reviews/components/Review";
+import Workflow from "@/components/common/Workflow";
 
 const AppRouter = () => {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          {/* Common public routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/show-workflow" element={<Workflow />} />
 
-          {/* guests routes */}
           <Route element={<GuestRoutes />}>
             <Route path="/sign-in" element={<SignInPage />} />
           </Route>
 
-          {/* Protected  Routes */}
           <Route element={<ProtectedRoutes />}>
             <Route element={<SideBar />}>
               <Route path="/dashboard" element={<Dashboard />} />

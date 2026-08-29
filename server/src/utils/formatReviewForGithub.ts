@@ -5,10 +5,6 @@ export function formatReviewForGithub(review: any) {
     markdown += `### Issues Found\n\n`;
 
     for (const issue of review.issues) {
-      // const source =
-      //   issue.source === "previous_pr_comparison"
-      //     ? "Previous PR Comparison"
-      //     : "Current PR";
 
       markdown += `### ${issue.severity.toUpperCase()} — ${issue.title}\n\n`;
       // markdown += `**Source:** ${source}\n\n`;

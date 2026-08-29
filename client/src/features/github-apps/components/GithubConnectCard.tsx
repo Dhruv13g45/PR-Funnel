@@ -15,12 +15,18 @@ import { api } from "@/lib/api";
 import { useGithubInstallation } from "@/hooks/useGithubInstallation";
 import { useQueryClient } from "@tanstack/react-query";
 
+interface InstallationStatusResponse {
+  installed?: boolean;
+}
+
 const GithubConnectCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const { data } = useGithubInstallation();
+  const { data } = useGithubInstallation() as {
+    data: InstallationStatusResponse | undefined;
+  };
 
   const connected = data?.installed ?? false;
 
@@ -37,31 +43,33 @@ const GithubConnectCard: React.FC = () => {
   }, []);
 
   const handleInstallation = async () => {
-    if (connected) {
-      const response = await api.get("/github/disconnect");
-      const success = response?.data?.success ?? undefined;
+    setLoading(true);
 
-      if (success) {
-        queryClient.invalidateQueries({
-          queryKey: ["github-installation"],
-        });
+    try {
+      if (connected) {
+        const response = await api.get<{ success?: boolean }>(
+          "/github/disconnect",
+        );
+
+        if (response.data.success) {
+          await queryClient.invalidateQueries({
+            queryKey: ["github-installation"],
+          });
+        }
+      } else {
+        const response = await api.get<{ data: string }>("/github/install-url");
+        window.location.href = response.data.data;
       }
-    } else {
-      try {
-        const response = await api.get("/github/install-url");
-        window.location.href = await response?.data?.data;
-      } catch (error: any) {
-        console.log("Status:", error.response?.status);
-        console.log("Response:", error.response?.data);
-        console.log("URL:", error.config?.url);
-        console.log("Base URL:", error.config?.baseURL);
-      }
+    } catch (error: any) {
+      console.log("GitHub App action failed", error.response?.data ?? error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Card
-      className={`max-w-lg m-3 transition-all hover:shadow-lg ${
+      className={`m-3 w-full max-w-lg transition-all hover:shadow-lg ${
         connected
           ? "border border-sky-500/60 ring-1 ring-sky-500/8 bg-slate-900/25 shadow-[0_8px_30px_rgba(2,132,199,0.06)]"
           : "border border-slate-900/60 bg-slate-900/30"
@@ -107,8 +115,8 @@ const GithubConnectCard: React.FC = () => {
       </CardHeader>
 
       <CardContent>
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-stretch justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="min-w-0 text-sm text-muted-foreground">
             <p>
               {connected
                 ? "App is installed and connected to your account."
@@ -139,7 +147,7 @@ const GithubConnectCard: React.FC = () => {
             </ul>
           </div>
 
-          <div>
+          <div className="shrink-0 self-end sm:self-auto">
             <Button
               onClick={handleInstallation}
               size="sm"
