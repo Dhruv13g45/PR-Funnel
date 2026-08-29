@@ -1,4 +1,7 @@
-import { generateEmbeddings } from "../../services/embedding.services.js";
+import {
+  generateEmbeddings,
+  generateEmbeddingsBatch,
+} from "../../services/embedding.services.js";
 import {
   getPullRequestFiles,
   getRepositoryFile,
@@ -96,20 +99,62 @@ export const prReviewPipeline = inngestClient.createFunction(
       return result;
     });
 
-    await step.run("Generate and store embeddings", async () => {
-      for (const [index, chunk] of chunks.entries()) {
-        const embedding = await generateEmbeddings(chunk.content);
+    // await step.run("Generate and store embeddings", async () => {
+    //   for (const [index, chunk] of chunks.entries()) {
+    //     const embedding = await generateEmbeddings(chunk.content);
 
-        const vectorId = `${event.data.owner}/${event.data.repo}:${event.data.prNumber}:${chunk.path}:${index}`;
+    //     const vectorId = `${event.data.owner}/${event.data.repo}:${event.data.prNumber}:${chunk.path}:${index}`;
+
+    //     await storeCodeChunk(vectorId, embedding, {
+    //       repository: `${event?.data.owner}/${event?.data.repo}`,
+    //       pullRequestNumber: event?.data.prNumber,
+    //       filePath: chunk.path,
+    //       content: chunk.content,
+    //       startLine: chunk.startLine,
+    //       endLine: chunk.endLine,
+    //       sourceType: "pr",
+    //     });
+    //   }
+    // });
+
+    await step.run("Generate and store embeddings", async () => {
+      const texts = chunks.map((chunk) => chunk.content);
+
+      const embeddings = (await generateEmbeddingsBatch(texts)) ?? [];
+
+      if (embeddings.length !== chunks.length) {
+        throw new Error(
+          `Embedding count mismatch. Chunks: ${chunks.length}, Embeddings: ${embeddings.length}`,
+        );
+      }
+
+      for (const [index, chunk] of chunks.entries()) {
+        const embedding = embeddings[index];
+
+        if (!embedding) {
+          throw new Error(
+            `Missing embedding for chunk ${index}: ${chunk.path}`,
+          );
+        }
+
+        const vectorId =
+          `${event.data.owner}/${event.data.repo}:` +
+          `${event.data.prNumber}:${chunk.path}:${index}`;
 
         await storeCodeChunk(vectorId, embedding, {
-          repository: `${event?.data.owner}/${event?.data.repo}`,
-          pullRequestNumber: event?.data.prNumber,
+          repository: `${event.data.owner}/${event.data.repo}`,
+
+          pullRequestNumber: event.data.prNumber,
+
           filePath: chunk.path,
+
           content: chunk.content,
+
           startLine: chunk.startLine,
+
           endLine: chunk.endLine,
-          sourceType: "pr"
+
+          sourceType: "pr",
         });
       }
     });
@@ -270,4 +315,31 @@ export const prReviewPipeline = inngestClient.createFunction(
       );
     });
   },
+
+  // test pipeline
+  // async ({ event, step }) => {
+  //   await step.run("Testing the single line embedding", async () => {
+  //     const embedding = await generateEmbeddings(
+  //       "This is a test embedding for PR Funnel",
+  //     );
+
+  //     console.log("Embedding length:", embedding.length);
+  //     console.log("First 5 values:", embedding.slice(0, 5));
+  //   });
+
+  //   await step.run("Testing the batch embedding", async () => {
+  //     const embeddings = await generateEmbeddingsBatch([
+  //       "function login() {}",
+  //       "function logout() {}",
+  //       "function authenticateUser() {}",
+  //     ]);
+
+  //     if (!embeddings?.length) {
+  //       throw new Error("No embeddings were generated for the batch test");
+  //     }
+
+  //     console.log("Number of embeddings:", embeddings.length);
+  //     console.log("Embedding dimension:", embeddings[0]?.length ?? 0);
+  //   });
+  // },
 );

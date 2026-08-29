@@ -1,4 +1,4 @@
-import { generateEmbeddings } from "../../services/embedding.services.js";
+import { generateEmbeddingsBatch } from "../../services/embedding.services.js";
 import {
   filterRelevantFiles,
   getRepositoryCodebase,
@@ -76,18 +76,60 @@ export const repoSyncPipeline = inngestClient.createFunction(
       return result;
     });
 
+    // await step.run("Generate and store repository embeddings", async () => {
+    //   for (const [index, chunk] of chunks.entries()) {
+    //     const embedding = await generateEmbeddings(chunk.content);
+
+    //     const vectorId = `${owner}/${repo}:main:${chunk.path}:${index}`;
+
+    //     await storeCodeChunk(vectorId, embedding, {
+    //       repository: `${owner}/${repo}`,
+    //       filePath: chunk.path,
+    //       content: chunk.content,
+    //       startLine: chunk.startLine,
+    //       endLine: chunk.endLine,
+    //       sourceType: "repository",
+    //     });
+    //   }
+
+    //   return {
+    //     chunkCount: chunks.length,
+    //   };
+    // });
+
     await step.run("Generate and store repository embeddings", async () => {
+      const texts = chunks.map((chunk) => chunk.content);
+
+      const embeddings = await generateEmbeddingsBatch(texts);
+
+      if (embeddings.length !== chunks.length) {
+        throw new Error(
+          `Embedding count mismatch. Chunks: ${chunks.length}, Embeddings: ${embeddings.length}`,
+        );
+      }
+
       for (const [index, chunk] of chunks.entries()) {
-        const embedding = await generateEmbeddings(chunk.content);
+        const embedding = embeddings[index];
+
+        if (!embedding) {
+          throw new Error(
+            `Missing embedding for chunk ${index}: ${chunk.path}`,
+          );
+        }
 
         const vectorId = `${owner}/${repo}:main:${chunk.path}:${index}`;
 
         await storeCodeChunk(vectorId, embedding, {
           repository: `${owner}/${repo}`,
+
           filePath: chunk.path,
+
           content: chunk.content,
+
           startLine: chunk.startLine,
+
           endLine: chunk.endLine,
+
           sourceType: "repository",
         });
       }
