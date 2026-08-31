@@ -20,19 +20,29 @@ export function useSyncRepository() {
       return data;
     },
 
-    onSuccess: () => {
+    onMutate: async ({ owner, repo }) => {
+      const toastId = toast.loading(`Syncing ${owner}/${repo}...`, {
+        description: "PR-Funnel is indexing the repository in the background.",
+      });
+
+      return { toastId };
+    },
+
+    onSuccess: (_data, { owner, repo }, context) => {
       queryClient.invalidateQueries({ queryKey: ["repositories"] });
-      toast.success("Repository sync started", {
-        description:
-          "PR-Funnel is now indexing the repository in the background.",
+
+      toast.success("Sync started", {
+        id: context?.toastId,
+        description: `${owner}/${repo} is being indexed and will be ready shortly.`,
       });
     },
 
-    onError: (error: any) => {
+    onError: (error: any, { owner, repo }, context) => {
       toast.error("Failed to start repository sync", {
+        id: context?.toastId,
         description:
           error?.response?.data?.message ??
-          "Something went wrong while starting the repository sync.",
+          `Something went wrong while starting the sync for ${owner}/${repo}.`,
       });
     },
   });
