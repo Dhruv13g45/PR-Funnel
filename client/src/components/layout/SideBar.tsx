@@ -15,6 +15,7 @@ import {
 import { useSession } from "@/hooks/useSession";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo-removebg-preview.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,9 +114,11 @@ const SideBar = () => {
                 to="/dashboard"
                 className="flex items-center gap-2.5 outline-none group"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 text-white shadow-md shadow-sky-500/10 group-hover:scale-105 transition-transform duration-200">
-                  <GitBranch className="h-5 w-5" />
-                </div>
+                <img
+                  src={logo}
+                  alt="PR Funnel logo"
+                  className="size-12 object-contain transition-transform duration-200 group-hover:scale-105"
+                />
                 <div>
                   <p className="text-sm font-bold tracking-wide bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                     PR Funnel

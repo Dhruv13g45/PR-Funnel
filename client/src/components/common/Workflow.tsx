@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo-removebg-preview.png";
 import QuietInteractiveBackdrop from "./QuietInteractiveBackdrop";
 
 const steps = [
@@ -67,9 +68,11 @@ const Workflow = () => {
         <div className="mx-auto max-w-6xl">
           <header className="flex items-center justify-between border-b border-slate-800/70 pb-5">
             <Link to="/" className="flex items-center gap-3">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/15">
-                <GitPullRequest className="size-5" />
-              </span>
+              <img
+                src={logo}
+                alt="PR Funnel logo"
+                className="size-12 object-contain"
+              />
               <span>
                 <span className="block text-sm font-bold tracking-wide text-white">
                   PR Funnel

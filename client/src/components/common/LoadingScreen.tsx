@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { GitBranch } from "lucide-react";
+import logo from "@/assets/logo-removebg-preview.png";
 
 export default function LoadingScreen() {
   return (
@@ -25,9 +25,13 @@ export default function LoadingScreen() {
           <motion.div
             animate={{ scale: [0.95, 1.05, 0.95] }}
             transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-sky-400 shadow-md shadow-sky-500/5"
+            className="flex size-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 shadow-md shadow-sky-500/5"
           >
-            <GitBranch className="h-5 w-5" />
+            <img
+              src={logo}
+              alt="PR Funnel logo"
+              className="size-12 object-contain"
+            />
           </motion.div>
         </div>
 
