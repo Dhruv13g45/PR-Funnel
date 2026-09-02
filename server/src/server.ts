@@ -44,16 +44,9 @@ app.use(
   getDashboardInfoController as unknown as RequestHandler,
 );
 
-console.log("Hello world");
-
 app.use("/api/inngest", inngestServe);
 
-app.use((req, res, next) => {
-  console.log("GLOBAL:", req.method, req.originalUrl);
-  next();
-});
-
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server  listening on port ${PORT}`);

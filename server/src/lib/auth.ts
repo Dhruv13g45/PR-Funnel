@@ -17,7 +17,6 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID! as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET! as string,
-
       mapProfileToUser(profile) {
         return {
           githubId: String(profile?.id),
@@ -35,6 +34,5 @@ export const auth = betterAuth({
 
   baseURL: process.env.BETTER_AUTH_URL!,
 
-  // trustedOrigins: [process.env.CLIENT_URL!],
-  trustedOrigins: ["http://localhost:5173", "http://localhost:4173"],
+  trustedOrigins: [process.env.CLIENT_URL!, "http://localhost:5173"],
 });
