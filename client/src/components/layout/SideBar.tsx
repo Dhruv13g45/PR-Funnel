@@ -25,9 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Nav labels will be plain text with icons; individual route components
-// are rendered by the router `Outlet` at the main pane.
-
 const SideBar = () => {
   const [width, setWidth] = useState(() => {
     if (typeof window !== "undefined") {

@@ -26,8 +26,8 @@ export const auth = betterAuth({
           login: profile?.login,
           image: profile?.avatar_url,
           location: profile?.location,
-        }
-      }
+        };
+      },
     },
   },
 
@@ -35,5 +35,6 @@ export const auth = betterAuth({
 
   baseURL: process.env.BETTER_AUTH_URL!,
 
-  trustedOrigins: [process.env.CLIENT_URL!],
+  // trustedOrigins: [process.env.CLIENT_URL!],
+  trustedOrigins: ["http://localhost:5173", "http://localhost:4173"],
 });

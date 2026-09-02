@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "http://localhost:8000/api",
-  withCredentials: true, 
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

@@ -102,7 +102,7 @@ export async function githubCallbackController(req: Request, res: Response) {
   );
 
   return res.redirect(
-    `http://localhost:5173/github-apps?installed=${installFlag}`,
+    `${process.env.CLIENT_URL}/github-apps?installed=${installFlag}`,
   );
 }
 
