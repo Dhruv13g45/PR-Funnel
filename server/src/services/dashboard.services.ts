@@ -35,10 +35,7 @@ export async function getAllPullRequestsInfo(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const installationId = Number(installation.installationId);
@@ -69,10 +66,7 @@ export async function getAllRepositoriesInfo(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const installationId = Number(installation.installationId);
@@ -116,10 +110,7 @@ export async function getAllReviewsInfo(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const installationId = Number(installation.installationId);
@@ -186,10 +177,7 @@ export async function getRecentPullRequests(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const installationId = Number(installation.installationId);
@@ -224,10 +212,7 @@ export async function getRecentReviews(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const installationId = Number(installation.installationId);
@@ -276,10 +261,7 @@ export async function getRepositoryHealth(userId: string) {
   });
 
   if (!installation) {
-    return {
-      message: "No GitHub installation found",
-      success: false,
-    };
+    return [];
   }
 
   const repositories = await prisma.repoSync.findMany({

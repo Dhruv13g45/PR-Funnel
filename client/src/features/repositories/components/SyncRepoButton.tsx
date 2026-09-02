@@ -117,7 +117,7 @@ const SyncRepoButton = ({ owner, repo }: SyncRepoButtonProps) => {
         variant="outline"
         disabled={syncRepository.isPending || watchingSync}
         onClick={startSync}
-        className="border-slate-700 bg-slate-950/60 text-slate-200 hover:border-sky-500/60 hover:bg-sky-500/10 hover:text-sky-300"
+        className="border-slate-700 bg-slate-950/60 text-white hover:border-sky-500/60 hover:bg-sky-500/10 hover:text-sky-300"
       >
         {syncRepository.isPending ? (
           <Loader2 className="animate-spin" aria-hidden="true" />

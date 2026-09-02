@@ -11,7 +11,7 @@ const GithubButton = () => {
     try {
       await authClient.signIn.social({
         provider: "github",
-        callbackURL: "http://localhost:5173/dashboard",
+        callbackURL: `${window.location.origin}/dashboard`,
       });
     } catch (error) {
       setIsLoading(false);
