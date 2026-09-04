@@ -9,7 +9,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import api from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

@@ -11,7 +11,7 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import api from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {

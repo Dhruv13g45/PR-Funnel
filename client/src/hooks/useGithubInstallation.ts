@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import api from "@/lib/api";
 
 const getGithubInstallationStatus = async () => {
   const { data } = await api.get("/github/installation-status");

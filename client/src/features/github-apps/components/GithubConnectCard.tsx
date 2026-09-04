@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Plug, Trash2, Loader2, Key, GitPullRequest, Bot } from "lucide-react";
-import { api } from "@/lib/api";
+import api from "@/lib/api";
 import { useGithubInstallation } from "@/hooks/useGithubInstallation";
 import { useQueryClient } from "@tanstack/react-query";
 
