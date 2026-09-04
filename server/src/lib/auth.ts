@@ -13,6 +13,10 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  account: {
+    storeStateStrategy: "database",
+  },
+
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID! as string,

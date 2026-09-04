@@ -20,6 +20,15 @@ app.use(
 
 app.use(cookieParser());
 
+app.use("/api/auth", (req, res, next) => {
+  if (req.path.includes("/callback/")) {
+    console.log("AUTH CALLBACK COOKIES:", Object.keys(req.cookies || {}));
+    console.log("AUTH CALLBACK STATE:", req.query.state);
+  }
+
+  next();
+});
+
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(
