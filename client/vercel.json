@@ -3,6 +3,10 @@
     {
       "source": "/api/auth/:path*",
       "destination": "https://pr-funnel.onrender.com/api/auth/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
