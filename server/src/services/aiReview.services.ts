@@ -5,6 +5,41 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_PR_FUNNEL_API_KEY!,
 });
 
+const reviewModels = [
+  process.env.GOOGLE_PR_FUNNEL_MODEL ?? "gemini-3.5-flash",
+  ...(process.env.GOOGLE_PR_FUNNEL_MODEL_FALLBACKS?.split(",") ?? [
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.7-flash",
+    "gemini-3.8-flash",
+    "gemini-2.5-pro",
+  ]),
+]
+  .map((model) => model.trim())
+  .filter(
+    (model, index, models) =>
+      model.length > 0 && models.indexOf(model) === index,
+  );
+
+function isQuotaOrRateLimitError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as { status?: unknown; message?: unknown };
+  const status = candidate.status;
+  const message =
+    typeof candidate.message === "string" ? candidate.message : "";
+
+  return (
+    status === 429 ||
+    status === 503 ||
+    /resource[_ ]exhausted|quota|rate.?limit|too many requests/i.test(message)
+  );
+}
+
 export async function generateCodeReview(
   changedCode: string,
   repositoryContext: string,
@@ -138,15 +173,36 @@ Do not include code fences.
 Do not include any text outside the JSON.
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-    },
-  });
+  let lastError: unknown;
 
-  return response.text;
+  for (const [index, model] of reviewModels.entries()) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+        },
+      });
+
+      return response.text ?? "";
+    } catch (error) {
+      lastError = error;
+
+      if (
+        !isQuotaOrRateLimitError(error) ||
+        index === reviewModels.length - 1
+      ) {
+        throw error;
+      }
+
+      console.warn(
+        `Gemini model ${model} hit a quota/rate limit; trying fallback ${reviewModels[index + 1]}.`,
+      );
+    }
+  }
+
+  throw lastError;
 }
 
 export async function savePullRequestReview(
