@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/auth/:path*",
-      "destination": "https://pr-funnel.onrender.com/api/auth/:path*"
+      "source": "/api/:path*",
+      "destination": "https://pr-funnel.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
