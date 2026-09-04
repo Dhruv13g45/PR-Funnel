@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import api from "@/lib/api";
 import QuietInteractiveBackdrop from "@/components/common/QuietInteractiveBackdrop";
 
 interface DashboardRepository {
