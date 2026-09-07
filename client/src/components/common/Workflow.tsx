@@ -27,7 +27,7 @@ const steps = [
   },
   {
     number: "02",
-    label: "Index the codebase",
+    label: "Synchronize your repository",
     title: "Give every pull request the context behind it.",
     description:
       "PR Funnel reads relevant source files, chunks the code, and builds a searchable picture of your repository.",

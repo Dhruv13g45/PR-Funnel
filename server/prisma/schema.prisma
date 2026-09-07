@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -9,30 +8,30 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+  accounts           Account[]
   githubInstallation GithubInstallation?
 
   @@unique([email])
   @@map("user")
 }
 
-model GithubInstallation{
-  id String @id @default(cuid())
-  userId String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model GithubInstallation {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   installationId BigInt
-  accountLogin String?
-  accountType String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  accountLogin   String?
+  accountType    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Session {
@@ -83,18 +82,17 @@ model Verification {
   @@map("verification")
 }
 
-
 model PullRequest {
   id             String    @id @default(cuid())
   installationId Int
-  repoFullName   String 
+  repoFullName   String
   prNumber       Int
   title          String
   authorLogin    String?
-  headSha        String 
+  headSha        String
   baseBranch     String
-  status         String    @default("pending") 
-  reviewComment  String? 
+  status         String    @default("pending")
+  reviewComment  String?
   reviewedAt     DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -102,7 +100,6 @@ model PullRequest {
   @@unique([repoFullName, prNumber])
   @@map("pull_request")
 }
-
 
 model RepoSync {
   id             String    @id @default(cuid())
