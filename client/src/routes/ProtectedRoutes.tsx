@@ -4,8 +4,6 @@ import LoadingScreen from "@/components/common/LoadingScreen";
 
 const ProtectedRoutes = () => {
   const { data: session, isPending } = useSession();
-  console.log(session);
-  console.log(isPending);
 
   if (isPending) {
     return <LoadingScreen />;

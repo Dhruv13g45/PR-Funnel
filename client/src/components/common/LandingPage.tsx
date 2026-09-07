@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Activity,
@@ -83,9 +84,85 @@ const previewReviews = [
   },
 ];
 
+type SpotlightRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
 const LandingPage = () => {
+  const workflowButtonRef = useRef<HTMLAnchorElement>(null);
+  const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
+    null,
+  );
+  const [showSpotlight, setShowSpotlight] = useState(true);
+
+  useEffect(() => {
+    const workflowButton = workflowButtonRef.current;
+    if (!workflowButton) return;
+
+    workflowButton.focus({ preventScroll: true });
+
+    const frame = window.requestAnimationFrame(() => {
+      const rect = workflowButton.getBoundingClientRect();
+      setSpotlightRect({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+    });
+    const timeout = window.setTimeout(() => setShowSpotlight(false), 1750);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
+  }, []);
+
+  const spotlightSize = spotlightRect
+    ? Math.max(spotlightRect.width, spotlightRect.height) + 32
+    : 0;
+  const spotlightTop = spotlightRect
+    ? spotlightRect.top + spotlightRect.height / 2 - spotlightSize / 2
+    : 0;
+  const spotlightLeft = spotlightRect
+    ? spotlightRect.left + spotlightRect.width / 2 - spotlightSize / 2 + 16
+    : 0;
+
   return (
     <QuietInteractiveBackdrop>
+      <AnimatePresence>
+        {spotlightRect && showSpotlight && (
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none fixed z-50 rounded-full border border-sky-200/20"
+            initial={{
+              top: "calc(50% - 80vmax)",
+              left: "calc(50% - 80vmax)",
+              width: "160vmax",
+              height: "160vmax",
+              borderRadius: "50%",
+              boxShadow: "0 0 0 100vmax rgba(2, 6, 23, 0)",
+            }}
+            animate={{
+              top: spotlightTop,
+              left: spotlightLeft,
+              width: spotlightSize,
+              height: spotlightSize,
+              borderRadius: "50%",
+              boxShadow:
+                "0 0 0 100vmax rgba(2, 6, 23, 0.42), 0 0 18px 2px rgba(125, 211, 252, 0.16)",
+            }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 1.45,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+          />
+        )}
+      </AnimatePresence>
       <main className="min-h-screen overflow-hidden px-5 py-6 text-slate-100 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <header className="flex items-center justify-between border-b border-slate-800/70 pb-5">
@@ -162,8 +239,9 @@ const LandingPage = () => {
                   <ArrowRight className="size-4" />
                 </Link>
                 <Link
+                  ref={workflowButtonRef}
                   to="/show-workflow"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900/50 px-5 py-3 text-sm font-medium text-slate-300 transition hover:border-sky-500/40 hover:text-white"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900/50 px-5 py-3 text-sm font-medium text-slate-300 transition hover:border-sky-500/40 hover:text-white focus:outline-none focus-visible:border-sky-300/45"
                 >
                   See the workflow
                 </Link>
